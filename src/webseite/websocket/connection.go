@@ -25,7 +25,7 @@ func CreateConnection(ws *websocket.Conn) *Connection {
 		ws:   ws,
 	}
 
-	h.register <- c
+	Hub.register <- c
 	go c.writePump()
 	go c.readPump()
 
@@ -47,7 +47,7 @@ type Connection struct {
 // readPump pumps messages from the websocket connection to the hub.
 func (c *Connection) readPump() {
 	defer func() {
-		h.unregister <- c
+		Hub.unregister <- c
 		c.ws.Close()
 	}()
 
@@ -65,9 +65,11 @@ func (c *Connection) readPump() {
 		}
 
 		m := new(Message)
-		m.connection = c
-		m.message = message
-		h.messages <- m
+		m.Connection = c
+		m.Message = message
+
+		// Tell the hub to handle it
+		Hub.messages <- m
 	}
 }
 

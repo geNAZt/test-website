@@ -1,6 +1,6 @@
 package websocket
 
-type MessageAccepter func([]byte, *Connection) bool
+type MessageAccepter func(*Message) bool
 
 type EventListener struct {
 	incoming        chan *Message
@@ -30,7 +30,7 @@ func (es *EventSystem) Listen(fn MessageAccepter) <-chan *Message {
 
 func (es *EventSystem) Emit(message *Message) {
 	for _, c := range es.eventListener {
-		if c.messageAccepter(message.message, message.connection) {
+		if c.messageAccepter(message) {
 			c.incoming <- message
 		}
 	}

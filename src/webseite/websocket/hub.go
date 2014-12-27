@@ -21,10 +21,10 @@ const (
 
 type Message struct {
 	// Connection which has sent this message
-	connection *Connection
+	Connection *Connection
 
 	// Message
-	message []byte
+	Message []byte
 }
 
 type hub struct {
@@ -44,20 +44,21 @@ type hub struct {
 	messages chan *Message
 
 	// EventSystem for incoming Messages
-
+	eventSystem *EventSystem
 }
 
-var h = &hub{
+var Hub = &hub{
 	broadcast:   make(chan []byte, maxMessageSize),
 	register:    make(chan *Connection, 1),
 	unregister:  make(chan *Connection, 1),
 	connections: make(map[*Connection]bool),
 	messages:    make(chan *Message),
+	eventSystem: new(EventSystem),
 }
 
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
-	go h.run()
+	go Hub.run()
 }
 
 func (h *hub) run() {
@@ -79,6 +80,12 @@ func (h *hub) run() {
 					delete(h.connections, c)
 				}
 			}
+		case m := <-h.messages:
+			h.eventSystem.Emit(m)
 		}
 	}
+}
+
+func (h *hub) Listen(fn MessageAccepter) <-chan *Message {
+	return h.eventSystem.Listen(fn)
 }

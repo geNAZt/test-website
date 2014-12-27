@@ -12,14 +12,20 @@
 
             if (window["WebSocket"]) {
                 conn = new WebSocket("ws://{{.host}}/ws");
+
                 conn.onclose = function(evt) {
-                    appendLog($("<div><b>Connection closed.</b></div>"))
-                }
+                    console.log("Connection closed")
+                };
+
                 conn.onmessage = function(evt) {
-                    appendLog($("<div/>").text(evt.data))
-                }
+                    console.log(evt.data)
+                };
+
+                conn.onopen = function() {
+                    conn.send("time:test");
+                };
             } else {
-                appendLog($("<div><b>Your browser does not support WebSockets.</b></div>"))
+                console.log($("<div><b>Your browser does not support WebSockets.</b></div>"))
             }
         });
     </script>
