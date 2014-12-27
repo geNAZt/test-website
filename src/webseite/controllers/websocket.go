@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/astaxie/beego"
+	"time"
 	"webseite/websocket"
 )
 
@@ -18,21 +19,19 @@ func (w *WSController) Get() {
 		fmt.Println(err)
 		return
 	}
-	c := &connection{send: make(chan []byte, 256), ws: ws}
-	quit := write(c)
-	h.register <- c
-	go c.writePump(quit)
-	c.readPump()
+
+	conn := websocket.CreateConnection(ws)
+	conn.AppendChannel(write(conn))
 }
 
-func write(c *connection) chan struct{} {
+func write(c *websocket.Connection) chan struct{} {
 	ticker := time.NewTicker(5 * time.Second)
 	quit := make(chan struct{})
 	go func() {
 		for {
 			select {
 			case <-ticker.C:
-				c.send <- []byte(time.Now().UTC().Format("dd.mm.yyyy"))
+				c.Send <- []byte("time:" + time.Now().UTC().String())
 			case <-quit:
 				ticker.Stop()
 				return
@@ -40,16 +39,4 @@ func write(c *connection) chan struct{} {
 		}
 	}()
 	return quit
-}
-
-func randomString(l int) string {
-	bytes := make([]byte, l)
-	for i := 0; i < l; i++ {
-		bytes[i] = byte(randInt(65, 90))
-	}
-	return string(bytes)
-}
-
-func randInt(min int, max int) int {
-	return min + rand.Intn(max-min)
 }

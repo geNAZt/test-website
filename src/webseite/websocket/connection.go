@@ -15,19 +15,21 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func Upgrade(w http.ResponseWriter, r *http.Request, responseHeader http.Header) (*Conn, error) {
+func Upgrade(w http.ResponseWriter, r *http.Request, responseHeader http.Header) (*websocket.Conn, error) {
 	return upgrader.Upgrade(w, r, responseHeader)
 }
 
-func CreateConnection(ws *Conn) *Connection {
+func CreateConnection(ws *websocket.Conn) *Connection {
 	c := &Connection{
-		send: make(chan []byte, 256),
+		Send: make(chan []byte, 256),
 		ws:   ws,
 	}
 
 	h.register <- c
 	go c.writePump()
-	c.readPump()
+	go c.readPump()
+
+	return c
 }
 
 // connection is an middleman between the websocket connection and the hub.
@@ -36,7 +38,10 @@ type Connection struct {
 	ws *websocket.Conn
 
 	// Buffered channel of outbound messages.
-	send chan []byte
+	Send chan []byte
+
+	// Custom appended channels
+	customChannels []chan struct{}
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -59,7 +64,10 @@ func (c *Connection) readPump() {
 			break
 		}
 
-		h.broadcast <- message
+		m := new(Message)
+		m.connection = c
+		m.message = message
+		h.messages <- m
 	}
 }
 
@@ -68,14 +76,13 @@ func (c *Connection) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 
 	defer func() {
-		h.unregister <- c
 		ticker.Stop()
 		c.ws.Close()
 	}()
 
 	for {
 		select {
-		case message, ok := <-c.send:
+		case message, ok := <-c.Send:
 			if !ok {
 				c.write(websocket.CloseMessage, []byte{})
 				return
@@ -95,4 +102,14 @@ func (c *Connection) writePump() {
 func (c *Connection) write(opCode int, payload []byte) error {
 	c.ws.SetWriteDeadline(time.Now().Add(writeWait))
 	return c.ws.WriteMessage(opCode, payload)
+}
+
+func (c *Connection) AppendChannel(channel chan struct{}) {
+	c.customChannels = append(c.customChannels, channel)
+}
+
+func (c *Connection) CloseCustomChannels() {
+	for _, c := range c.customChannels {
+		close(c)
+	}
 }

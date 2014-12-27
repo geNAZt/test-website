@@ -21,7 +21,7 @@ const (
 
 type Message struct {
 	// Connection which has sent this message
-	connection Connection
+	connection *Connection
 
 	// Message
 	message []byte
@@ -42,6 +42,9 @@ type hub struct {
 
 	// Message channel for incoming Messages
 	messages chan *Message
+
+	// EventSystem for incoming Messages
+
 }
 
 var h = &hub{
@@ -63,14 +66,16 @@ func (h *hub) run() {
 		case c := <-h.register:
 			h.connections[c] = true
 		case c := <-h.unregister:
+			c.CloseCustomChannels()
+			close(c.Send)
 			delete(h.connections, c)
-			close(c.send)
 		case m := <-h.broadcast:
 			for c := range h.connections {
 				select {
-				case c.send <- m:
+				case c.Send <- m:
 				default:
-					close(c.send)
+					c.CloseCustomChannels()
+					close(c.Send)
 					delete(h.connections, c)
 				}
 			}
