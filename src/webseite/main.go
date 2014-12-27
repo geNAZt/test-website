@@ -7,6 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
 	_ "webseite/controllers/websocket"
 	_ "webseite/models"
 	_ "webseite/routers"
@@ -51,13 +52,10 @@ func init() {
 		orm.RegisterDriver(dbDriver, orm.DR_MySQL)
 		beego.BeeLogger.Info("Connecting to MySQL Server: %s@%s/%s using a MinPool of %d, MaxConnections of %d", dbUser, dbHost, dbDatabase, dbMinPool, dbMaxConnections)
 		orm.RegisterDataBase("default", dbDriver, dbUser+":"+dbPass+"@"+dbHost+"/"+dbDatabase+"?charset=utf8", dbMinPool, dbMaxConnections)
-	} else if dbDriver == "postgres" {
-		orm.RegisterDriver(dbDriver, orm.DR_Postgres)
-		beego.BeeLogger.Info("Connecting to Postgreas Server: %s@%s/%s using a MinPool of %d, MaxConnections of %d", dbUser, dbHost, dbDatabase, dbMinPool, dbMaxConnections)
-		orm.RegisterDataBase("default", dbDriver, "postgres://"+dbUser+":"+dbPass+"@"+dbHost+"/"+dbDatabase+"?client_encoding=utf8", dbMinPool, dbMaxConnections)
+	} else {
+		beego.BeeLogger.Error("Currently there is only MySQL Support. Cya..")
+		os.Exit(-1)
 	}
-
-	// TODO add support for more database drivers
 }
 
 func main() {
