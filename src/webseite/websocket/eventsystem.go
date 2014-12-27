@@ -1,9 +1,9 @@
 package websocket
 
-type MessageAccepter func(*Message) bool
+type MessageAccepter func(Message) bool
 
 type EventListener struct {
-	incoming        chan *Message
+	incoming        chan Message
 	messageAccepter MessageAccepter
 }
 
@@ -12,7 +12,7 @@ type EventSystem struct {
 }
 
 func (es *EventSystem) createListener(fn MessageAccepter) *EventListener {
-	c := make(chan *Message, 5)
+	c := make(chan Message, 5)
 
 	listener := new(EventListener)
 	listener.incoming = c
@@ -21,14 +21,14 @@ func (es *EventSystem) createListener(fn MessageAccepter) *EventListener {
 	return listener
 }
 
-func (es *EventSystem) Listen(fn MessageAccepter) <-chan *Message {
+func (es *EventSystem) Listen(fn MessageAccepter) <-chan Message {
 	var listener *EventListener
 	listener = es.createListener(fn)
 	es.eventListener = append(es.eventListener, listener)
 	return listener.incoming
 }
 
-func (es *EventSystem) Emit(message *Message) {
+func (es *EventSystem) Emit(message Message) {
 	for _, c := range es.eventListener {
 		if c.messageAccepter(message) {
 			c.incoming <- message

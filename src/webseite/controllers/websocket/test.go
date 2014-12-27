@@ -11,7 +11,7 @@ func init() {
 }
 
 func listen() {
-	c := websocket.Hub.Listen(func(message *websocket.Message) bool {
+	c := websocket.Hub.Listen(func(message websocket.Message) bool {
 		return bytes.Index(message.Message, []byte("time:")) != -1
 	})
 

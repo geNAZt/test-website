@@ -64,7 +64,7 @@ func (c *Connection) readPump() {
 			break
 		}
 
-		m := new(Message)
+		m := Message{}
 		m.Connection = c
 		m.Message = message
 

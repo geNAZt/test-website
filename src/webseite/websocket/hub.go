@@ -41,7 +41,7 @@ type hub struct {
 	unregister chan *Connection
 
 	// Message channel for incoming Messages
-	messages chan *Message
+	messages chan Message
 
 	// EventSystem for incoming Messages
 	eventSystem *EventSystem
@@ -52,8 +52,8 @@ var Hub = &hub{
 	register:    make(chan *Connection, 1),
 	unregister:  make(chan *Connection, 1),
 	connections: make(map[*Connection]bool),
-	messages:    make(chan *Message),
-	eventSystem: new(EventSystem),
+	messages:    make(chan Message),
+	eventSystem: &EventSystem{},
 }
 
 func init() {
@@ -86,6 +86,6 @@ func (h *hub) run() {
 	}
 }
 
-func (h *hub) Listen(fn MessageAccepter) <-chan *Message {
+func (h *hub) Listen(fn MessageAccepter) <-chan Message {
 	return h.eventSystem.Listen(fn)
 }
