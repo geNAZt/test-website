@@ -11,9 +11,12 @@
             var conn;
 
             if (window["WebSocket"]) {
+                var interval;
+
                 conn = new WebSocket("ws://{{.host}}/ws");
 
                 conn.onclose = function(evt) {
+                    window.clearInterval( interval );
                     console.log("Connection closed")
                 };
 
@@ -22,10 +25,10 @@
                 };
 
                 conn.onopen = function() {
-                    conn.send("time:test");
+                    interval = window.setInterval(function() {
+                        conn.send("time:test");
+                    }, 1);
                 };
-            } else {
-                console.log($("<div><b>Your browser does not support WebSockets.</b></div>"))
             }
         });
     </script>

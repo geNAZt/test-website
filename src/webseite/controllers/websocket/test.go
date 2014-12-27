@@ -2,7 +2,6 @@ package websocket
 
 import (
 	"bytes"
-	"fmt"
 	"webseite/websocket"
 )
 
@@ -11,15 +10,14 @@ func init() {
 }
 
 func listen() {
-	c := websocket.Hub.Listen(func(message websocket.Message) bool {
+	websocket.Hub.Listen(func(message websocket.Message) bool {
 		return bytes.Index(message.Message, []byte("time:")) != -1
 	})
 
-	for {
+	/*for {
 		select {
 		case m := <-c:
-			fmt.Println("got new time message: ")
-			fmt.Printf("%v", m)
+			websocket.Hub.Broadcast <- m.Message
 		}
-	}
+	}*/
 }
