@@ -30,9 +30,20 @@ func Upgrade(w beego.Controller) *Connection {
 		Session: w.CruSession,
 	}
 
+	// Tell the Hub we have a new Connection and start to pump messages
 	Hub.register <- c
 	go c.writePump()
 	go c.readPump()
+
+	// When the connection closes save the session
+	close := make(chan struct{}, 1)
+	go func() {
+		select {
+		case <-close:
+			c.Session.SessionRelease(w.Ctx.ResponseWriter)
+		}
+	}()
+	c.AppendChannel(close)
 
 	return c
 }
