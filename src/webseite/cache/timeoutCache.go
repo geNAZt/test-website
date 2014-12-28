@@ -11,7 +11,7 @@ import (
 type TimeoutCache struct {
 	evictAfter int64
 	evictList  *list.List
-	items      map[interface{}]*list.Element
+	items      map[interface{}]interface{}
 	lock       sync.RWMutex
 }
 
@@ -32,7 +32,7 @@ func NewTimeoutCache(timeout int64) (*TimeoutCache, error) {
 	c := &TimeoutCache{
 		evictAfter: timeout,
 		evictList:  list.New(),
-		items:      make(map[interface{}]*list.Element),
+		items:      make(map[interface{}]interface{}),
 	}
 
 	ticker := time.NewTicker(time.Millisecond * 1000)
@@ -54,8 +54,7 @@ func (c *TimeoutCache) Get(key interface{}) (value interface{}, ok bool) {
 	defer c.lock.RUnlock()
 
 	if ent, ok := c.items[key]; ok {
-		c.evictList.MoveToFront(ent)
-		return ent.Value.(*entry).value, true
+		return ent, true
 	}
 
 	return nil, false
@@ -82,9 +81,8 @@ func (c *TimeoutCache) Add(key, value interface{}) {
 	defer c.lock.Unlock()
 
 	// Check for existing item
-	if ent, ok := c.items[key]; ok {
-		c.evictList.MoveToFront(ent)
-		ent.Value.(*entry).value = value
+	if ent, ok := c.items[key]; ok && ent != nil {
+		c.items[key] = value
 		return
 	}
 
@@ -101,13 +99,25 @@ func (c *TimeoutCache) removeElement(e *list.Element) {
 	delete(c.items, kv.key)
 }
 
+// Search for an element with a key
+func (c *TimeoutCache) searchElement(key interface{}) *list.Element {
+	for e := c.evictList.Back(); e != nil; e = e.Prev() {
+		kv := e.Value.(*entry)
+		if kv.key == key {
+			return e
+		}
+	}
+
+	return nil
+}
+
 // Remove removes the provided key from the cache.
 func (c *TimeoutCache) Remove(key interface{}) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	if ent, ok := c.items[key]; ok {
-		c.removeElement(ent)
+	if ele := c.searchElement(key); ele != nil {
+		c.removeElement(ele)
 	}
 }
 
