@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/astaxie/beego"
 	"time"
 	"webseite/websocket"
@@ -14,13 +13,7 @@ type WSController struct {
 func (w *WSController) Get() {
 	w.EnableRender = false
 
-	ws, err := websocket.Upgrade(w.Ctx.ResponseWriter, w.Ctx.Request, nil)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	conn := websocket.CreateConnection(ws)
+	conn := websocket.Upgrade(w.Controller)
 	conn.AppendChannel(write(conn))
 }
 

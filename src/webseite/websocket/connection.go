@@ -1,6 +1,8 @@
 package websocket
 
 import (
+	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/session"
 	"github.com/gorilla/websocket"
 	"net/http"
 	"time"
@@ -15,14 +17,17 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func Upgrade(w http.ResponseWriter, r *http.Request, responseHeader http.Header) (*websocket.Conn, error) {
-	return upgrader.Upgrade(w, r, responseHeader)
-}
+func Upgrade(w beego.Controller) *Connection {
+	ws, err := upgrader.Upgrade(w.Ctx.ResponseWriter, w.Ctx.Request, nil)
+	if err != nil {
+		beego.BeeLogger.Warn("Could not upgrade Websocket Request %v", err)
+		return nil
+	}
 
-func CreateConnection(ws *websocket.Conn) *Connection {
 	c := &Connection{
-		Send: make(chan []byte, 256),
-		ws:   ws,
+		Send:    make(chan []byte, 256),
+		ws:      ws,
+		Session: w.CruSession,
 	}
 
 	Hub.register <- c
@@ -42,6 +47,9 @@ type Connection struct {
 
 	// Custom appended channels
 	customChannels []chan struct{}
+
+	// Session from HTTP Request
+	Session session.SessionStore
 }
 
 // readPump pumps messages from the websocket connection to the hub.
