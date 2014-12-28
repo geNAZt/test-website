@@ -19,7 +19,7 @@ type TimeoutCache struct {
 type entry struct {
 	key   interface{}
 	value interface{}
-	added int64
+	evict int64
 }
 
 func NewTimeoutCache(timeout int64) (*TimeoutCache, error) {
@@ -70,7 +70,7 @@ func (c *TimeoutCache) autoEvict() {
 
 	for e := c.evictList.Back(); e != nil; e = e.Prev() {
 		kv := e.Value.(*entry)
-		if time-kv.added > c.evictAfter {
+		if time > kv.evict {
 			c.removeElement(e)
 		}
 	}
@@ -89,7 +89,7 @@ func (c *TimeoutCache) Add(key, value interface{}) {
 	}
 
 	// Add new item
-	ent := &entry{key, value, time.Now().Unix()}
+	ent := &entry{key, value, time.Now().Add(time.Duration(c.evictAfter * int64(time.Second))).Unix()}
 	entry := c.evictList.PushFront(ent)
 	c.items[key] = entry
 }

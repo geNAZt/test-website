@@ -18,12 +18,14 @@ var upgrader = websocket.Upgrader{
 }
 
 func Upgrade(w beego.Controller) *Connection {
+	// Try to update the Request
 	ws, err := upgrader.Upgrade(w.Ctx.ResponseWriter, w.Ctx.Request, nil)
 	if err != nil {
 		beego.BeeLogger.Warn("Could not upgrade Websocket Request %v", err)
 		return nil
 	}
 
+	// Create new connection
 	c := &Connection{
 		Send:    make(chan []byte, 256),
 		ws:      ws,
