@@ -35,7 +35,7 @@ func NewTimeoutCache(timeout int64) (*TimeoutCache, error) {
 		items:      make(map[interface{}]*list.Element),
 	}
 
-	ticker := time.NewTicker(time.Millisecond * 100)
+	ticker := time.NewTicker(time.Millisecond * 1000)
 	go func() {
 		for {
 			select {
