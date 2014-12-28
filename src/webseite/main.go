@@ -18,7 +18,7 @@ import (
 
 func init() {
 	// GOMAXPROCS
-	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
+	runtime.GOMAXPROCS(runtime.NumCPU() * 8)
 
 	// Start the profiler if needed
 	if v, err := beego.AppConfig.Bool("ProfilerOn"); err == nil && v == true {
