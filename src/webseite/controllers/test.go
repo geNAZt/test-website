@@ -4,6 +4,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	"webseite/models"
+	"webseite/storage"
 )
 
 type TestController struct {
@@ -50,9 +51,17 @@ func (c *TestController) Get() {
 
 	c.SetSession("counter", counter)
 
+	storage := storage.GetStorage()
+	url, err := storage.GetUrl("avatar/geNAZt.jpg")
+
+	if err != nil {
+		beego.BeeLogger.Warn("Could not find avatar/geNAZt.jpg: %v", err)
+	}
+
 	// Put the data into the template
 	c.TplNames = "test.tpl"
 	c.Data["user"] = users
 	c.Data["visitCounter"] = counter
 	c.Data["host"] = "127.0.0.1:8080"
+	c.Data["txtUrl"] = url
 }

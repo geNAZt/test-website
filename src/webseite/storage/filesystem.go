@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"github.com/astaxie/beego"
 	"os"
 )
@@ -8,15 +9,25 @@ import (
 type fileSystemStorage struct {
 }
 
+var (
+	storageDir string
+	staticUrl  string
+)
+
 func init() {
-	exist := exists(beego.AppConfig.String("FilestorageDir"))
+	storageDir = beego.AppConfig.String("FilestorageDir")
+	staticUrl = beego.AppConfig.String("FilestorageUrl")
+
+	exist := exists(storageDir)
 	if !exist {
-		os.MkdirAll(beego.AppConfig.String("FilestorageDir"), 0666)
+		os.MkdirAll(storageDir, 0666)
 	}
+
+	beego.SetStaticPath(staticUrl, storageDir)
 }
 
 func (s *fileSystemStorage) Store(bytes []byte, filename string) (bool, error) {
-	file, err := os.Create(beego.AppConfig.String("FilestorageDir") + "/" + filename)
+	file, err := os.Create(storageDir + "/" + filename)
 	if err != nil {
 		return false, err
 	}
@@ -32,6 +43,19 @@ func (s *fileSystemStorage) Store(bytes []byte, filename string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (s *fileSystemStorage) Exists(filename string) bool {
+	stat, err := os.Stat(storageDir + "/" + filename)
+	return err != nil && stat.Size() > 0
+}
+
+func (s *fileSystemStorage) GetUrl(filename string) (string, error) {
+	if s.Exists(filename) {
+		return staticUrl + "/" + filename, nil
+	}
+
+	return "", errors.New("Not found")
 }
 
 func exists(path string) bool {

@@ -4,6 +4,8 @@ import "github.com/astaxie/beego"
 
 type Storage interface {
 	Store([]byte, string) (bool, error)
+	Exists(string) bool
+	GetUrl(string) (string, error)
 }
 
 var useOpenStack bool

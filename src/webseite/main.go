@@ -57,25 +57,24 @@ func init() {
 		panic("Currently there is only MySQL Support. Cya..")
 	}
 
-	/*
-		file, err := os.OpenFile("test.txt", 0, 0666)
+	/*file, err := os.OpenFile("geNAZt.jpg", 0, 0666)
 
-		if err != nil {
-			panic(err)
-		}
+	if err != nil {
+		panic(err)
+	}
 
-		stat, err := file.Stat()
-		if err != nil {
-			panic(err)
-		}
+	stat, err := file.Stat()
+	if err != nil {
+		panic(err)
+	}
 
-		buffer := make([]byte, stat.Size())
-		file.Read(buffer)
-		file.Close()
+	buffer := make([]byte, stat.Size())
+	file.Read(buffer)
+	file.Close()
 
-		storage := storage.GetStorage()
-		storage.Store(buffer, "test.txt")
-	*/
+	storage := storage.GetStorage()
+	storage.Store(buffer, "avatar/geNAZt.jpg")*/
+
 }
 
 func main() {
