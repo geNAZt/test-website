@@ -5,14 +5,16 @@ import (
 	"github.com/astaxie/beego"
 	"os"
 	"path"
+	"webseite/cache"
 )
 
 type fileSystemStorage struct {
 }
 
 var (
-	storageDir string
-	staticUrl  string
+	storageDir    string
+	staticUrl     string
+	fsExistsCache *cache.TimeoutCache
 )
 
 func init() {
@@ -23,6 +25,14 @@ func init() {
 	if !exist {
 		os.MkdirAll(storageDir, 0666)
 	}
+
+	// Build up cache
+	tempCache, err := cache.NewTimeoutCache(60)
+	if err != nil {
+		panic(err)
+	}
+
+	fsExistsCache = tempCache
 
 	beego.SetStaticPath(staticUrl, storageDir)
 }
@@ -54,8 +64,15 @@ func (s *fileSystemStorage) Store(bytes []byte, filename string) (bool, error) {
 }
 
 func (s *fileSystemStorage) Exists(filename string) bool {
-	stat, err := os.Stat(storageDir + "/" + filename)
-	return err == nil && stat != nil && stat.Size() > 0
+	value, ok := fsExistsCache.Get(filename)
+	if !ok {
+		stat, err := os.Stat(storageDir + "/" + filename)
+		exist := err == nil && stat != nil && stat.Size() > 0
+		fsExistsCache.Add(filename, exist)
+		return exist
+	}
+
+	return value.(bool)
 }
 
 func (s *fileSystemStorage) Delete(filename string) (bool, error) {

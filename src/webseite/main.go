@@ -8,6 +8,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"runtime"
 	_ "webseite/controllers/websocket"
 	_ "webseite/models"
 	_ "webseite/routers"
@@ -16,6 +17,9 @@ import (
 )
 
 func init() {
+	// GOMAXPROCS
+	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
+
 	// Start the profiler if needed
 	if v, err := beego.AppConfig.Bool("ProfilerOn"); err == nil && v == true {
 		address := beego.AppConfig.String("ProfilerIP") + ":" + beego.AppConfig.String("ProfilerPort")
