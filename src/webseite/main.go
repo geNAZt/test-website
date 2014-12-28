@@ -8,7 +8,9 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"path/filepath"
 	"runtime"
+	"strings"
 	_ "webseite/controllers/websocket"
 	_ "webseite/models"
 	_ "webseite/routers"
@@ -62,24 +64,51 @@ func init() {
 		panic("Currently there is only MySQL Support. Cya..")
 	}
 
-	file, err := os.OpenFile("geNAZt.jpg", 0, 0666)
-
-	if err != nil {
-		panic(err)
-	}
-
-	stat, err := file.Stat()
-	if err != nil {
-		panic(err)
-	}
-
-	buffer := make([]byte, stat.Size())
-	file.Read(buffer)
-	file.Close()
-
+	// Be sure that any static content is inside the storage
 	storage := storage.GetStorage()
-	storage.Store(buffer, "avatar/geNAZt.jpg")
+	errWalk := filepath.Walk("static/", func(path string, info os.FileInfo, err error) error {
+		strippedPath := strings.Replace(path, "static"+string(filepath.Separator), "", -1)
 
+		if !info.IsDir() && !storage.Exists(strippedPath) {
+			beego.BeeLogger.Info("Storing file " + strippedPath + " into given storage")
+
+			file, err := os.OpenFile(path, 0, 0666)
+			if err != nil {
+				return err
+			}
+
+			buffer := make([]byte, info.Size())
+			read, errRead := file.Read(buffer)
+			if errRead != nil {
+				return errRead
+			}
+
+			errClose := file.Close()
+			if errClose != nil {
+				return errClose
+			}
+
+			if read == 0 {
+				beego.BeeLogger.Info("Skipping 0 byte file " + strippedPath)
+				return nil
+			}
+
+			success, errStore := storage.Store(buffer, strippedPath)
+			if errStore != nil {
+				return errStore
+			}
+
+			if !success {
+				beego.BeeLogger.Info("Storage could not store file " + strippedPath)
+			}
+		}
+
+		return nil
+	})
+
+	if errWalk != nil {
+		panic(errWalk)
+	}
 }
 
 func main() {

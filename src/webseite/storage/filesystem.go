@@ -5,6 +5,7 @@ import (
 	"github.com/astaxie/beego"
 	"os"
 	"path"
+	"strings"
 	"webseite/cache"
 )
 
@@ -38,7 +39,7 @@ func init() {
 }
 
 func (s *fileSystemStorage) Store(bytes []byte, filename string) (bool, error) {
-	fullPath := storageDir + "/" + filename
+	fullPath := strings.Replace(storageDir+"/"+filename, "\\", "/", -1)
 	fullDir := path.Dir(fullPath)
 
 	if !exists(fullDir) {
