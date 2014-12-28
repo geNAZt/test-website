@@ -126,6 +126,15 @@ func (s *openStackStorage) Exists(filename string) bool {
 	}
 }
 
+func (s *openStackStorage) Delete(filename string) (bool, error) {
+	res := objects.Delete(client, "testing", filename, nil)
+	if res.Err == nil {
+		return true, nil
+	}
+
+	return false, res.Err
+}
+
 func (s *openStackStorage) GetUrl(filename string) (string, error) {
 	if s.Exists(filename) {
 		return url + "/" + filename, nil

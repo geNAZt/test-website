@@ -58,6 +58,15 @@ func (s *fileSystemStorage) Exists(filename string) bool {
 	return err == nil && stat != nil && stat.Size() > 0
 }
 
+func (s *fileSystemStorage) Delete(filename string) (bool, error) {
+	err := os.Remove(filename)
+	if err == nil {
+		return true, nil
+	}
+
+	return false, err
+}
+
 func (s *fileSystemStorage) GetUrl(filename string) (string, error) {
 	if s.Exists(filename) {
 		return staticUrl + "/" + filename, nil
