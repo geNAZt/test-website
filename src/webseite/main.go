@@ -7,10 +7,11 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"net/http"
 	_ "net/http/pprof"
-	"os"
+	//"os"
 	_ "webseite/controllers/websocket"
 	_ "webseite/models"
 	_ "webseite/routers"
+	//"webseite/storage"
 )
 
 func init() {
@@ -53,9 +54,28 @@ func init() {
 		beego.BeeLogger.Info("Connecting to MySQL Server: %s@%s/%s using a MinPool of %d, MaxConnections of %d", dbUser, dbHost, dbDatabase, dbMinPool, dbMaxConnections)
 		orm.RegisterDataBase("default", dbDriver, dbUser+":"+dbPass+"@"+dbHost+"/"+dbDatabase+"?charset=utf8", dbMinPool, dbMaxConnections)
 	} else {
-		beego.BeeLogger.Error("Currently there is only MySQL Support. Cya..")
-		os.Exit(-1)
+		panic("Currently there is only MySQL Support. Cya..")
 	}
+
+	/*
+		file, err := os.OpenFile("test.txt", 0, 0666)
+
+		if err != nil {
+			panic(err)
+		}
+
+		stat, err := file.Stat()
+		if err != nil {
+			panic(err)
+		}
+
+		buffer := make([]byte, stat.Size())
+		file.Read(buffer)
+		file.Close()
+
+		storage := storage.GetStorage()
+		storage.Store(buffer, "test.txt")
+	*/
 }
 
 func main() {
