@@ -55,7 +55,7 @@ func (s *fileSystemStorage) Store(bytes []byte, filename string) (bool, error) {
 
 func (s *fileSystemStorage) Exists(filename string) bool {
 	stat, err := os.Stat(storageDir + "/" + filename)
-	return err != nil && stat != nil && stat.Size() > 0
+	return err == nil && stat != nil && stat.Size() > 0
 }
 
 func (s *fileSystemStorage) GetUrl(filename string) (string, error) {
