@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
-	"webseite/models"
+	//"github.com/astaxie/beego/orm"
+	//"webseite/models"
 	"webseite/storage"
 )
 
@@ -12,7 +12,7 @@ type TestController struct {
 }
 
 func (c *TestController) Get() {
-	// ORM
+	/*// ORM
 	o := orm.NewOrm()
 	o.Using("default")
 
@@ -49,7 +49,7 @@ func (c *TestController) Get() {
 
 	counter++
 
-	c.SetSession("counter", counter)
+	c.SetSession("counter", counter)*/
 
 	storage := storage.GetStorage()
 	url, err := storage.GetUrl("avatar/geNAZt.jpg")
@@ -60,8 +60,6 @@ func (c *TestController) Get() {
 
 	// Put the data into the template
 	c.TplNames = "test.tpl"
-	c.Data["user"] = users
-	c.Data["visitCounter"] = counter
 	c.Data["host"] = "127.0.0.1:8080"
 	c.Data["txtUrl"] = url
 }

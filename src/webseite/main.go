@@ -7,11 +7,11 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"net/http"
 	_ "net/http/pprof"
-	//"os"
+	"os"
 	_ "webseite/controllers/websocket"
 	_ "webseite/models"
 	_ "webseite/routers"
-	//"webseite/storage"
+	"webseite/storage"
 )
 
 func init() {
@@ -57,7 +57,7 @@ func init() {
 		panic("Currently there is only MySQL Support. Cya..")
 	}
 
-	/*file, err := os.OpenFile("geNAZt.jpg", 0, 0666)
+	file, err := os.OpenFile("geNAZt.jpg", 0, 0666)
 
 	if err != nil {
 		panic(err)
@@ -73,7 +73,7 @@ func init() {
 	file.Close()
 
 	storage := storage.GetStorage()
-	storage.Store(buffer, "avatar/geNAZt.jpg")*/
+	storage.Store(buffer, "avatar/geNAZt.jpg")
 
 }
 

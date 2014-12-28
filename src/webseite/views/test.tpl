@@ -36,10 +36,5 @@
 
 <body>
 <img src="{{.txtUrl}}" />
-{{range $key, $val := .user}}
-{{$key}}
-{{$val.Name}}
-{{end}}
-{{.visitCounter}}
 </body>
 </html>

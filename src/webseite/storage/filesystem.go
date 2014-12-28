@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/astaxie/beego"
 	"os"
+	"path"
 )
 
 type fileSystemStorage struct {
@@ -27,6 +28,13 @@ func init() {
 }
 
 func (s *fileSystemStorage) Store(bytes []byte, filename string) (bool, error) {
+	fullPath := storageDir + "/" + filename
+	fullDir := path.Dir(fullPath)
+
+	if !exists(fullDir) {
+		os.MkdirAll(fullDir, 0666)
+	}
+
 	file, err := os.Create(storageDir + "/" + filename)
 	if err != nil {
 		return false, err
@@ -47,7 +55,7 @@ func (s *fileSystemStorage) Store(bytes []byte, filename string) (bool, error) {
 
 func (s *fileSystemStorage) Exists(filename string) bool {
 	stat, err := os.Stat(storageDir + "/" + filename)
-	return err != nil && stat.Size() > 0
+	return err != nil && stat != nil && stat.Size() > 0
 }
 
 func (s *fileSystemStorage) GetUrl(filename string) (string, error) {
