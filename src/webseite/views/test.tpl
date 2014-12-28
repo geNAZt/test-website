@@ -35,6 +35,6 @@
 </head>
 
 <body>
-<img src="{{.txtUrl}}" />
+<img src="{{ "avatar/geNAZt.jpg" | asset }}" />
 </body>
 </html>

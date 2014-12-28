@@ -12,6 +12,7 @@ import (
 	_ "webseite/models"
 	_ "webseite/routers"
 	"webseite/storage"
+	_ "webseite/template"
 )
 
 func init() {
