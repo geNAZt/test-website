@@ -12,7 +12,7 @@ type TimeoutCache struct {
 	evictAfter int64
 	evictList  *list.List
 	items      map[interface{}]*list.Element
-	lock       sync.Mutex
+	lock       sync.RWMutex
 }
 
 // entry is used to hold a value in the evictList
@@ -50,8 +50,8 @@ func NewTimeoutCache(timeout int64) (*TimeoutCache, error) {
 
 // Get looks up a key's value from the cache.
 func (c *TimeoutCache) Get(key interface{}) (value interface{}, ok bool) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.lock.RLock()
+	defer c.lock.RUnlock()
 
 	if ent, ok := c.items[key]; ok {
 		c.evictList.MoveToFront(ent)
@@ -113,7 +113,7 @@ func (c *TimeoutCache) Remove(key interface{}) {
 
 // Len returns the number of items in the cache.
 func (c *TimeoutCache) Len() int {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.lock.RLock()
+	defer c.lock.RUnlock()
 	return c.evictList.Len()
 }
