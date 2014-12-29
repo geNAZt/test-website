@@ -71,9 +71,6 @@ func init() {
 		"asset": wtemp.AssetResolver,
 	}
 
-	templateEngine := template.New("css.js.template")
-	templateEngine.Funcs(funcMap)
-
 	// Be sure that any static content is inside the storage
 	storage := storage.GetStorage()
 	errWalk := filepath.Walk("static/", func(path string, info os.FileInfo, err error) error {
@@ -106,6 +103,8 @@ func init() {
 			ext := filepath.Ext(strippedPath)
 			if ext == ".css" || ext == ".js" {
 				contentString := string(buffer)
+				templateEngine := template.New(strippedPath)
+				templateEngine.Funcs(funcMap)
 				template, errTemplate := templateEngine.Parse(contentString)
 				if errTemplate != nil {
 					return errTemplate
