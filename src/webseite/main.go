@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
@@ -11,11 +12,12 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"text/template"
 	_ "webseite/controllers/websocket"
 	_ "webseite/models"
 	_ "webseite/routers"
 	"webseite/storage"
-	_ "webseite/template"
+	wtemp "webseite/template"
 )
 
 func init() {
@@ -64,6 +66,14 @@ func init() {
 		panic("Currently there is only MySQL Support. Cya..")
 	}
 
+	// Build up the text template engine so we can parse css/js
+	funcMap := template.FuncMap{
+		"asset": wtemp.AssetResolver,
+	}
+
+	templateEngine := template.New("css.js.template")
+	templateEngine.Funcs(funcMap)
+
 	// Be sure that any static content is inside the storage
 	storage := storage.GetStorage()
 	errWalk := filepath.Walk("static/", func(path string, info os.FileInfo, err error) error {
@@ -91,6 +101,23 @@ func init() {
 			if read == 0 {
 				beego.BeeLogger.Info("Skipping 0 byte file " + strippedPath)
 				return nil
+			}
+
+			ext := filepath.Ext(strippedPath)
+			if ext == ".css" || ext == ".js" {
+				contentString := string(buffer)
+				template, errTemplate := templateEngine.Parse(contentString)
+				if errTemplate != nil {
+					return errTemplate
+				}
+
+				newbytes := bytes.NewBufferString("")
+				errTemplateExecute := template.Execute(newbytes, nil)
+				if errTemplateExecute != nil {
+					return errTemplateExecute
+				}
+
+				buffer = newbytes.Bytes()
 			}
 
 			success, errStore := storage.Store(buffer, strippedPath)

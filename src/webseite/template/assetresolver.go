@@ -6,10 +6,10 @@ import (
 )
 
 func init() {
-	beego.AddFuncMap("asset", assetResolver)
+	beego.AddFuncMap("asset", AssetResolver)
 }
 
-func assetResolver(filename string) string {
+func AssetResolver(filename string) string {
 	storage := storage.GetStorage()
 	url, err := storage.GetUrl(filename)
 	if err != nil {
