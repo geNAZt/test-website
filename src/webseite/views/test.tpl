@@ -5,6 +5,8 @@
     <title>Test</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
+    <link rel="stylesheet" type="text/css" href="{{ "css/main.css" | asset }}" />
+
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
     <script type="text/javascript">
         $(function() {
@@ -35,6 +37,7 @@
 </head>
 
 <body>
+<div id="header"></div>
 <img src="{{ "avatar/geNAZt.jpg" | asset }}" />
 </body>
 </html>

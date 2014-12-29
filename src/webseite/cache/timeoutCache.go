@@ -88,8 +88,8 @@ func (c *TimeoutCache) Add(key, value interface{}) {
 
 	// Add new item
 	ent := &entry{key, value, time.Now().Add(time.Duration(c.evictAfter * int64(time.Second))).Unix()}
-	entry := c.evictList.PushFront(ent)
-	c.items[key] = entry
+	c.evictList.PushFront(ent)
+	c.items[key] = value
 }
 
 // removeElement is used to remove a given list element from the cache
