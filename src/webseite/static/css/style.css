@@ -16,6 +16,11 @@ body {
 h1, .h1, h2, .h2, h3, .h3 {
   margin:0;
 }
+#server-table table tr img {
+  width: 20px;
+  height: 20px;
+  margin-right: 4px;
+}
 #logo {
   position:relative;
   background: #525252 url(../img/devoops_pattern_b10.png) 0 0 repeat;
