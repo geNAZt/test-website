@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/astaxie/beego"
 	"time"
+	"webseite/models/json"
 	"webseite/websocket"
 )
 
@@ -14,7 +15,9 @@ func (w *WSController) Get() {
 	w.EnableRender = false
 
 	conn := websocket.Upgrade(w.Controller)
-	conn.AppendChannel(write(conn))
+
+	// Send this Client all known Servers
+	json.SendAllServers(conn)
 }
 
 func write(c *websocket.Connection) chan struct{} {

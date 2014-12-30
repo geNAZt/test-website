@@ -17,6 +17,7 @@ import (
 	_ "webseite/models"
 	_ "webseite/routers"
 	"webseite/storage"
+	"webseite/tasks"
 	wtemp "webseite/template"
 )
 
@@ -104,6 +105,7 @@ func init() {
 			if ext == ".css" || ext == ".js" {
 				contentString := string(buffer)
 				templateEngine := template.New(strippedPath)
+				templateEngine.Delims("![", "]!")
 				templateEngine.Funcs(funcMap)
 				template, errTemplate := templateEngine.Parse(contentString)
 				if errTemplate != nil {
@@ -148,6 +150,9 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	// Build up and init all tasks we need
+	tasks.InitTasks()
 
 	// Run the Webserver
 	beego.Run()

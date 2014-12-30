@@ -25,6 +25,11 @@ func Upgrade(w beego.Controller) *Connection {
 		return nil
 	}
 
+	// Be 100% sure that the Session is there
+	if w.CruSession == nil {
+		w.StartSession()
+	}
+
 	// Create new connection
 	c := &Connection{
 		Send:    make(chan []byte, 256),
