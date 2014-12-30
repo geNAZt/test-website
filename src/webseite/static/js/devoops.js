@@ -4,7 +4,7 @@ var conn;
 var skip = 0;
 var chart;
 var offset = new Date().getTimezoneOffset() * 60;
-
+var graphSettings = [];
 
 //Better to construct options first and then pass it as a parameter
 var options = {
@@ -26,7 +26,7 @@ var options = {
 	},
 	colorSet: "colorset",
 	backgroundColor: "#ebebeb",
-	data: [ ]
+	data: []
 };
 
 var wsFuncs = {
@@ -57,23 +57,27 @@ var wsFuncs = {
 			Online: data["Online"]
 		});
 
-		options["data"] = [];
+		rerenderChart();
 
-		// Convert them into the array
-		serversCopy = servers;
-		for (var key in serversCopy) {
-			if (serversCopy.hasOwnProperty(key)) {
-				options["data"].push(generateData(serversCopy[key]));
-				newSorted.push(serversCopy[key]);
-			}
-		}
-
-		$("#chartContainer").CanvasJSChart().render();
 		sortServers();
 	}
 };
 
-function generateData( server ) {
+function rerenderChart() {
+	options["data"] = [];
+
+	// Convert them into the array
+	serversCopy = servers;
+	for (var key in serversCopy) {
+		if (serversCopy.hasOwnProperty(key) && graphSettings.indexOf(serversCopy[key]["Name"]) == -1) {
+			options["data"].push(generateData(serversCopy[key]));
+		}
+	}
+
+	$("#chartContainer").CanvasJSChart().render();
+}
+
+function generateData(server) {
 	data = {
 		type: "line",
 		xValueType: "dateTime",
@@ -83,10 +87,10 @@ function generateData( server ) {
 		markerSize: 0,
 		toolTipContent: "<b>" + server["Name"] + "</b> ({x})<br/>Players: {y}",
 		name: server["Name"],
-		dataPoints: [ ]
+		dataPoints: []
 	};
 
-	server["Players"].forEach(function(ping) {
+	server["Players"].forEach(function (ping) {
 		data.dataPoints.push({
 			x: ( ping["Time"] - offset ) * 1000,
 			y: ping["Online"]
@@ -103,13 +107,13 @@ function renderTable() {
 
 	counter = 0;
 	rendered = 0;
-	sorted.forEach(function(value) {
-		if ( counter < skip ) {
+	sorted.forEach(function (value) {
+		if (counter < skip) {
 			counter++;
 			return;
 		}
 
-		if ( rendered == 5 ) {
+		if (rendered == 5) {
 			return;
 		}
 
@@ -123,58 +127,79 @@ function renderTable() {
 }
 
 function createTH() {
-	return "<thead><tr><th>#</th><th>Server Name</th><th>Minecraft IP</th><th>Website</th><th>Players</th><th>Record</th><th>Average (24h)</th><th>Ping</th></tr></thead>";
+	return "<thead><tr><th></th><th>ID</th><th>Server Name</th><th>Minecraft IP</th><th>Website</th><th>Players</th><th>Record</th><th>Average (24h)</th><th>Ping</th></tr></thead>";
 }
 
-function createTR( server ) {
+function createTR(server) {
 	tr = $('<tr />');
+
+	// Check
+	checkTd = $('<td />');
+	$('<input />', {
+		type: 'checkbox',
+		id: 'check_' + server["Id"],
+		value: server["Name"],
+		checked: graphSettings.indexOf(server["Name"]) == -1
+	}).click(function () {
+		if (graphSettings.indexOf(server["Name"]) == -1) {
+			graphSettings.push(server["Name"]);
+		} else {
+			var index = graphSettings.indexOf(server["Name"]);
+			if (index > -1) {
+				graphSettings.splice(index, 1);
+			}
+		}
+
+		rerenderChart();
+	}).appendTo(checkTd);
+	tr.append(checkTd);
 
 	// ID
 	idTd = $('<td />');
-	idTd.text( server["Id"] );
+	idTd.text(server["Id"]);
 	tr.append(idTd);
 
 	// Name
 	favicon = $('<img />');
 	favicon.attr('src', server["Favicon"]);
 	nameTd = $('<td />');
-	nameTd.append( favicon );
-	nameTd.append( server["Name"] );
+	nameTd.append(favicon);
+	nameTd.append(server["Name"]);
 	tr.append(nameTd);
 
 	// IP
 	ipTd = $('<td />');
-	ipTd.text( server["IP"] );
+	ipTd.text(server["IP"]);
 	tr.append(ipTd);
 
 	// Website
 	websiteTd = $('<td />');
 	link = $('<a />');
 	link.attr('href', server['Website']);
-	link.text( server['Website'] );
-	websiteTd.append( link );
-	tr.append( websiteTd );
+	link.text(server['Website']);
+	websiteTd.append(link);
+	tr.append(websiteTd);
 
 	// Players
 	playersTd = $('<td />');
-	playersTd.text( server["Online"] + " / " + server["MaxPlayers"] );
-	tr.append( playersTd );
+	playersTd.text(server["Online"] + " / " + server["MaxPlayers"]);
+	tr.append(playersTd);
 
 	// Record
 	recordTd = $('<td />');
-	recordTd.text( server["Record"] + " Players" );
-	tr.append( recordTd );
+	recordTd.text(server["Record"] + " Players");
+	tr.append(recordTd);
 
 	// Average
 	averageTd = $('<td />');
-	averageTd.text( server["Average"] + " Players" );
-	tr.append( averageTd );
+	averageTd.text(server["Average"] + " Players");
+	tr.append(averageTd);
 
 	// Ping
-	pingMS = Math.ceil( server["Ping"] / 1000000 );
+	pingMS = Math.ceil(server["Ping"] / 1000000);
 	pingTd = $('<td />');
-	pingTd.text( pingMS + " ms" );
-	tr.append( pingTd );
+	pingTd.text(pingMS + " ms");
+	tr.append(pingTd);
 
 	return tr;
 }
@@ -191,7 +216,7 @@ function sortServers() {
 	}
 
 	// Sort it
-	newSorted.sort(function(a, b) {
+	newSorted.sort(function (a, b) {
 		return b["Online"] - a["Online"];
 	});
 
