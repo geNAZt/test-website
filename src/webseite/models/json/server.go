@@ -25,6 +25,7 @@ type Server struct {
 	Ping       int32
 	Ping24     int32
 	Players    []Ping
+	Favicons   []status.Favicon `json:"-"`
 }
 
 type Ping struct {
@@ -51,6 +52,16 @@ type PlayerUpdate struct {
 type JSONUpdatePlayerResponse struct {
 	Ident string
 	Value PlayerUpdate
+}
+
+type JSONUpdateFaviconResponse struct {
+	Ident string
+	Value ServerFavicon
+}
+
+type ServerFavicon struct {
+	Server string
+	Icon   string
 }
 
 var Servers JSONServerResponse
@@ -138,6 +149,39 @@ func SendAllServers(c *websocket.Connection) {
 	c.Send <- jsonBytes
 }
 
+func SendFavicon(c *websocket.Connection, servername, favicon string) {
+	defer func() {
+		recover()
+	}()
+
+	fav := JSONUpdateFaviconResponse{
+		Ident: "favicon",
+		Value: ServerFavicon{
+			Icon:   favicon,
+			Server: servername,
+		},
+	}
+
+	jsonBytes, err := gojson.Marshal(fav)
+	if err != nil {
+		beego.BeeLogger.Warn("Could not convert to json: %v", err)
+		return
+	}
+
+	c.Send <- jsonBytes
+}
+
+func GetServer(name string) *Server {
+	for serverI := range Servers.Value {
+		server := &Servers.Value[serverI]
+		if server.Name == name {
+			return server
+		}
+	}
+
+	return nil
+}
+
 func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 	lock.RLock()
 	defer lock.RUnlock()
@@ -160,6 +204,7 @@ func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 				server.Favicon = status.Favicon
 			}
 			server.Ping = int32(status.Ping)
+			server.Favicons = status.Favicons
 
 			jsonPlayerUpdate := JSONUpdatePlayerResponse{
 				Ident: "updatePlayer",

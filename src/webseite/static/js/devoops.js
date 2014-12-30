@@ -1,6 +1,6 @@
 var servers = {};
 var sorted = [];
-var conn;
+var conn = null;
 var skip = 0;
 var chart;
 var offset = new Date().getTimezoneOffset() * 60;
@@ -8,6 +8,7 @@ var graphSettings = [];
 var colorArray = ["#5ca1c8", "#e42570", "#ced8b5", "#8774de", "#b8a0d0", "#7a645d", "#4f5e73", "#46be6d", "#961f7f", "#8e7867", "#6d53a7", "#992c7e", "#5c274e", "#e67c4b", "#d2ad7e", "#ed06f", "#878ea7", "#c2ef88", "#4b5aca", "#b974c4", "#85f6bb", "#2feb6a", "#7a650a", "#70a1aa", "#762128", "#8e8cf", "#d8d81e", "#14533f", "#f4e9e1", "#70f317", "#755ce0", "#1b5aab", "#73d3fd", "#6f931e", "#2bfeea", "#3c5a53", "#e05e81", "#267118", "#26608a", "#351810", "#d0cb25", "#78b849", "#ffef26", "#6437bf", "#8133bb", "#354453", "#2ecaa9", "#cf6416", "#5def3d", "#1a6281", "#47532c", "#12ce13", "#55f153", "#6c8ff4", "#e32548", "#724925", "#cbfe76", "#dd1b04", "#7d1b14", "#21e130", "#60233e", "#2bb540", "#dd63be", "#63b267"];
 var currentColorI = 0;
 var time = 2 * 24 * 60;
+var favicons = {};
 
 //Better to construct options first and then pass it as a parameter
 var options = {
@@ -42,13 +43,13 @@ var wsFuncs = {
         });
 
         $("#chartContainer").CanvasJSChart().render();
-        sortServers();
+        sortServers( true );
 
         $('#page-selection').bootpag({
             total: Math.ceil(sorted.length / 5)
         }).on("page", function (event, /* page number here */ num) {
             skip = 5 * (num - 1);
-            sortServers();
+            sortServers( true );
         });
     },
     updatePlayer: function (data) {
@@ -64,8 +65,12 @@ var wsFuncs = {
         });
 
         rerenderChart();
-
-        sortServers();
+        sortServers( false );
+    },
+    favicon: function(data) {
+        if (favicons[data["Server"]] !== undefined) {
+            favicons[data["Server"]].attr("src", data["Icon"]);
+        }
     }
 };
 
@@ -122,10 +127,14 @@ function generateData(server) {
     return data;
 }
 
-function renderTable() {
+function renderTable( renderAnimatedFavicons ) {
     table = $("<table />");
     table.addClass("table table-hover");
     table.append(createTH());
+
+    if (renderAnimatedFavicons) {
+        favicons = {};
+    }
 
     counter = 0;
     rendered = 0;
@@ -139,7 +148,7 @@ function renderTable() {
             return;
         }
 
-        table.append(createTR(value));
+        table.append(createTR(value, renderAnimatedFavicons));
         rendered++;
     });
 
@@ -152,7 +161,7 @@ function createTH() {
     return "<thead><tr><th></th><th>ID</th><th>Server Name</th><th>Minecraft IP</th><th>Website</th><th>Players</th><th>Record</th><th>Average (24h)</th><th>Ping</th></tr></thead>";
 }
 
-function createTR(server) {
+function createTR(server, renderAnimatedFavicons) {
     tr = $('<tr />');
 
     // Check
@@ -184,6 +193,15 @@ function createTR(server) {
     // Name
     favicon = $('<img />');
     favicon.attr('src', server["Favicon"]);
+
+    if ( renderAnimatedFavicons && conn != null ) {
+        favicons[server["Name"]] = favicon;
+
+        window.setTimeout(function() {
+            conn.send("animated:" + server["Name"]);
+        }, 10);
+    }
+
     nameTd = $('<td />');
     nameTd.append(favicon);
     nameTd.append(server["Name"]);
@@ -236,7 +254,7 @@ function createTR(server) {
     return tr;
 }
 
-function sortServers() {
+function sortServers( renderAnimatedFavicons ) {
     serversCopy = servers;
     newSorted = [];
 
@@ -255,7 +273,7 @@ function sortServers() {
     sorted = newSorted;
 
     // Rerender it
-    renderTable();
+    renderTable( renderAnimatedFavicons );
 }
 
 function connectToWebSocket(host) {
