@@ -23,6 +23,7 @@ type Server struct {
 	Average    int32
 	Favicon    string
 	Ping       int32
+	Ping24     int32
 	Players    []Ping
 }
 
@@ -67,17 +68,12 @@ func ReloadServers(servers []models.Server) {
 		sqlServer := servers[serverI]
 
 		jsonPings := []Ping{}
+		var jsonPing Ping
 
-		count := 0
 		for pingI := range sqlServer.Pings {
-			if count == 2*24*60 {
-				break
-			}
-			count++
-
 			sqlPing := sqlServer.Pings[pingI]
 
-			jsonPing := Ping{
+			jsonPing = Ping{
 				Online: sqlPing.Online,
 				Time:   sqlPing.Time.Unix(),
 			}
@@ -85,12 +81,40 @@ func ReloadServers(servers []models.Server) {
 			jsonPings = append(jsonPings, jsonPing)
 		}
 
+		// Get the database
+		o := orm.NewOrm()
+		o.Using("default")
+
+		// Load the 24 hour before ping
+		// Build up the Query
+		qb, _ := orm.NewQueryBuilder("mysql")
+		qb.Select("*").
+			From("ping").
+			Where("server_id = " + strconv.FormatInt(int64(sqlServer.Id), 10)).
+			Limit(1).
+			Offset(24 * 60)
+
+		// Get the SQL Statement and execute it
+		sql := qb.String()
+		pings := []models.Ping{}
+		o.Raw(sql).QueryRows(&pings)
+
+		var ping24 *models.Ping
+		if len(pings) > 0 {
+			ping24 = pings[0]
+		}
+
 		jsonServer := Server{
 			Id:      sqlServer.Id,
 			IP:      sqlServer.Ip,
 			Name:    sqlServer.Name,
 			Website: sqlServer.Website,
+			Online:  jsonPing.Online,
 			Players: jsonPings,
+		}
+
+		if ping24 != nil {
+			jsonServer.Ping24 = ping24.Online
 		}
 
 		jsonServer.RecalcAverage()
