@@ -111,7 +111,6 @@ func ping(server *models.Server) {
 	o.Raw(sql).QueryRows(&pings)
 
 	var ping24 models.Ping
-	ping24 = nil
 	if len(pings) > 0 {
 		ping24 = pings[0]
 	}
