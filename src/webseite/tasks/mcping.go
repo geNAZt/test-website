@@ -5,6 +5,7 @@ import (
 	"github.com/astaxie/beego/orm"
 	"github.com/astaxie/beego/toolbox"
 	status "github.com/geNAZt/minecraft-status"
+	statusdata "github.com/geNAZt/minecraft-status/data"
 	"strconv"
 	"time"
 	"webseite/models"
@@ -69,7 +70,15 @@ func ping(server *models.Server) {
 	status, err := status.GetStatus(server.Ip)
 	if err != nil {
 		beego.BeeLogger.Warn("Error while pinging: %v", err)
-		return
+
+		// Create "fake" ping
+		status = &statusdata.Status{
+			Players: &statusdata.MCPlayers{
+				Online: 0,
+				Max:    0,
+			},
+			Ping: time.Duration(30 * time.Nanosecond),
+		}
 	}
 
 	// Save ping
