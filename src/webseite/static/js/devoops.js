@@ -199,7 +199,7 @@ function createTR(server, renderAnimatedFavicons) {
 
         window.setTimeout(function() {
             conn.send("animated:" + server["Name"]);
-        }, 100);
+        }, 500);
     }
 
     nameTd = $('<td />');
