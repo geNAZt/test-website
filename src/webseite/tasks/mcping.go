@@ -33,10 +33,7 @@ func InitTasks() {
 		o.LoadRelated(&servers[serverI], "Pings", 0, 2*24*60, 0, "Time")
 	}
 
-	// Reload the JSON side
-	json.ReloadServers(servers)
-
-	mcserver := toolbox.NewTask("mcserver", "30 * * * * *", func() error {
+	mcping := toolbox.NewTask("mcping", "0 * * * * *", func() error {
 		// Reload servers
 		servers = []models.Server{}
 		o.Raw(sql).QueryRows(&servers)
@@ -49,10 +46,6 @@ func InitTasks() {
 		// Reload the JSON side
 		json.ReloadServers(servers)
 
-		return nil
-	})
-
-	mcping := toolbox.NewTask("mcping", "0 * * * * *", func() error {
 		// Ping all da servers
 		for serverId := range servers {
 			go ping(&servers[serverId])
@@ -62,7 +55,6 @@ func InitTasks() {
 	})
 
 	toolbox.AddTask("mcping", mcping)
-	toolbox.AddTask("mcserver", mcserver)
 
 	// Start the tasks
 	toolbox.StartTask()
