@@ -110,11 +110,11 @@ func ping(server *models.Server) {
 	pings := []models.Ping{}
 	o.Raw(sql).QueryRows(&pings)
 
-	ping24 := nil
+	ping24 := nil.(models.Ping)
 	if len(pings) > 0 {
 		ping24 = pings[0]
 	}
 
 	// Notify the JSON side
-	json.UpdateStatus(server.Id, status, ping24)
+	json.UpdateStatus(server.Id, status, &ping24)
 }
