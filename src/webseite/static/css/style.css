@@ -196,9 +196,11 @@ a.show-sidebar:hover {
 }
 table span.glyphicon-arrow-up {
 	color: #2ecc40;
+    margin-right: 4px;
 }
 table span.glyphicon-arrow-down {
 	color: #ff4136;
+    margin-right: 4px;
 }
 #page-selection {
 	display: inline-block;
