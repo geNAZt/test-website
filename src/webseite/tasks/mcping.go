@@ -89,6 +89,12 @@ func ping(server *models.Server) {
 
 	o.Insert(ping)
 
+	// Update record if needed
+	if int32(status.Players.Online) > server.Record {
+		server.Record = int32(status.Players.Online)
+		o.Update(server)
+	}
+
 	// Notify the JSON side
 	json.UpdateStatus(server.Id, status)
 }
