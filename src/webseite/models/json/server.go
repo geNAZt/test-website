@@ -44,6 +44,8 @@ type PlayerUpdate struct {
 	Time       int64
 	Ping       int32
 	Ping24     int32
+	Record     int32
+	Average    int32
 }
 
 type JSONUpdatePlayerResponse struct {
@@ -149,6 +151,9 @@ func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 		server := &Servers.Value[serverI]
 
 		if server.Id == id {
+			server.RecalcRecord()
+			server.RecalcAverage()
+
 			server.Online = online
 			server.MaxPlayers = max
 			if status.Favicon != "" {
@@ -164,6 +169,8 @@ func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 					MaxPlayers: max,
 					Time:       time.Now().Unix() - int64(offset),
 					Ping:       server.Ping,
+					Average:    server.Average,
+					Record:     server.Record,
 				},
 			}
 

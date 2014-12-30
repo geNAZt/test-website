@@ -55,6 +55,8 @@ var wsFuncs = {
         servers[data["Name"]]["MaxPlayers"] = data["MaxPlayers"];
         servers[data["Name"]]["Ping"] = data["Ping"];
         servers[data["Name"]]["Ping24"] = data["Ping24"];
+        servers[data["Name"]]["Record"] = data["Record"];
+        servers[data["Name"]]["Average"] = data["Average"];
         servers[data["Name"]]["Players"].push({
             Time: data["Time"],
             Online: data["Online"]
