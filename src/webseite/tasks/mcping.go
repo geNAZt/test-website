@@ -45,6 +45,9 @@ func InitTasks() {
 			o.LoadRelated(&servers[serverI], "Pings", 0, 2*24*60, 0, "Time")
 		}
 
+		// Reload the JSON side
+		json.ReloadServers(servers)
+
 		return nil
 	})
 
