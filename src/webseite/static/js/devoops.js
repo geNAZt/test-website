@@ -52,6 +52,7 @@ var wsFuncs = {
 		servers[data["Name"]]["Online"] = data["Online"];
 		servers[data["Name"]]["MaxPlayers"] = data["MaxPlayers"];
 		servers[data["Name"]]["Ping"] = data["Ping"];
+		servers[data["Name"]]["Ping24"] = data["Ping24"];
 		servers[data["Name"]]["Players"].push({
 			Time: data["Time"],
 			Online: data["Online"]
@@ -182,7 +183,17 @@ function createTR(server) {
 
 	// Players
 	playersTd = $('<td />');
-	playersTd.text(server["Online"] + " / " + server["MaxPlayers"]);
+	if ( server['Ping24'] !== undefined ) {
+		spanDir = $('<span />');
+		if ( server['Ping24'] > server['Online'] ) {
+			spanDir.addClass("glyphicon glyphicon-arrow-down");
+		} else {
+			spanDir.addClass("glyphicon glyphicon-arrow-up");
+		}
+		playersTd.append(spanDir);
+	}
+
+	playersTd.append(server["Online"] + " / " + server["MaxPlayers"]);
 	tr.append(playersTd);
 
 	// Record

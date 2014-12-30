@@ -102,8 +102,8 @@ func ping(server *models.Server) {
 	qb.Select("*").
 		From("ping").
 		Where("server_id = " + strconv.FormatInt(int64(server.Id), 10)).
-		Offset(24 * 60).
-		Limit(1)
+		Limit(1).
+		Offset(24 * 60)
 
 	// Get the SQL Statement and execute it
 	sql := qb.String()
