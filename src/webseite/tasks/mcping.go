@@ -34,6 +34,9 @@ func InitTasks() {
 		o.LoadRelated(&servers[serverI], "Pings", 0, 2*24*60, 0, "Time")
 	}
 
+	// Reload the JSON side
+	json.ReloadServers(servers)
+
 	mcping := toolbox.NewTask("mcping", "0 * * * * *", func() error {
 		// Reload servers
 		servers = []models.Server{}
