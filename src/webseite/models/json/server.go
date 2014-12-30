@@ -73,6 +73,10 @@ var Servers JSONServerResponse
 var lock sync.RWMutex
 var favicons map[string]StoredFavicon
 
+func init() {
+	favicons = make(map[string]StoredFavicon)
+}
+
 func ReloadServers(servers []models.Server) {
 	lock.Lock()
 	defer lock.Unlock()
