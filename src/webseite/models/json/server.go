@@ -202,9 +202,9 @@ func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 			server.MaxPlayers = max
 			if status.Favicon != "" {
 				server.Favicon = status.Favicon
+				server.Favicons = status.Favicons
 			}
 			server.Ping = int32(status.Ping)
-			server.Favicons = status.Favicons
 
 			jsonPlayerUpdate := JSONUpdatePlayerResponse{
 				Ident: "updatePlayer",
