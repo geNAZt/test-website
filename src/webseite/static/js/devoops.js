@@ -44,7 +44,7 @@ var wsFuncs = {
         sortServers();
 
         $('#page-selection').bootpag({
-            total: Math.floor(sorted.length / 5) + 1
+            total: Math.ceil(sorted.length / 5)
         }).on("page", function (event, /* page number here */ num) {
             skip = 5 * (num - 1);
             sortServers();
