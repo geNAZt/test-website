@@ -26,7 +26,13 @@ func listen() {
 }
 
 func displayAnimatedFavicon(m websocket.Message) {
-	servername := strings.Split(string(m.Message), ":")[1]
+	message := string(m.Message)
+
+	if !strings.Contains(message, ":") {
+		return
+	}
+
+	servername := strings.Split(message, ":")[1]
 	server := json.GetServer(servername)
 	if server != nil && len(server.Favicons) > 1 {
 		for faviconI := range server.Favicons {
