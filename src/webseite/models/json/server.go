@@ -101,7 +101,7 @@ func ReloadServers(servers []models.Server) {
 
 		var ping24 *models.Ping
 		if len(pings) > 0 {
-			ping24 = pings[0]
+			ping24 = &pings[0]
 		}
 
 		jsonServer := Server{
