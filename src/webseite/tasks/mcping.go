@@ -5,6 +5,7 @@ import (
 	"github.com/astaxie/beego/orm"
 	"github.com/astaxie/beego/toolbox"
 	status "github.com/geNAZt/minecraft-status"
+	"strconv"
 	"time"
 	"webseite/models"
 	"webseite/models/json"
@@ -95,6 +96,25 @@ func ping(server *models.Server) {
 		o.Update(server)
 	}
 
+	// Load the 24 hour before ping
+	// Build up the Query
+	qb, _ := orm.NewQueryBuilder("mysql")
+	qb.Select("*").
+		From("ping").
+		Where("server_id = " + strconv.FormatInt(int64(server.Id), 10)).
+		Offset(24 * 60).
+		Limit(1)
+
+	// Get the SQL Statement and execute it
+	sql := qb.String()
+	pings := []models.Ping{}
+	o.Raw(sql).QueryRows(&pings)
+
+	ping24 := nil
+	if len(pings) > 0 {
+		ping24 = pings[0]
+	}
+
 	// Notify the JSON side
-	json.UpdateStatus(server.Id, status)
+	json.UpdateStatus(server.Id, status, ping24)
 }

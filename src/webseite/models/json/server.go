@@ -42,6 +42,7 @@ type PlayerUpdate struct {
 	MaxPlayers int32
 	Time       int64
 	Ping       int32
+	Ping24     int32
 }
 
 type JSONUpdatePlayerResponse struct {
@@ -111,7 +112,7 @@ func SendAllServers(c *websocket.Connection) {
 	c.Send <- jsonBytes
 }
 
-func UpdateStatus(id int32, status *status.Status) {
+func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 	lock.RLock()
 	defer lock.RUnlock()
 
@@ -140,6 +141,10 @@ func UpdateStatus(id int32, status *status.Status) {
 					Time:       time.Now().Unix() - int64(offset),
 					Ping:       server.Ping,
 				},
+			}
+
+			if ping24 != nil {
+				jsonPlayerUpdate.Value.Ping24 = ping24.Online
 			}
 
 			jsonBytes, err := gojson.Marshal(jsonPlayerUpdate)
