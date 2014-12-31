@@ -67,7 +67,7 @@ type ServerFavicon struct {
 type StoredFavicon struct {
 	Favicon     string
 	Favicons    []status.Favicon
-	TimeWritten *time.Time
+	TimeWritten time.Time
 }
 
 var Servers JSONServerResponse
