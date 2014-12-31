@@ -65,16 +65,17 @@ type ServerFavicon struct {
 }
 
 type StoredFavicon struct {
-	Favicon  string
-	Favicons []status.Favicon
+	Favicon     string
+	Favicons    []status.Favicon
+	TimeWritten *time.Duration
 }
 
 var Servers JSONServerResponse
 var lock sync.RWMutex
-var favicons map[string]StoredFavicon
+var Favicons map[string]StoredFavicon
 
 func init() {
-	favicons = make(map[string]StoredFavicon)
+	Favicons = make(map[string]StoredFavicon)
 }
 
 func ReloadServers(servers []models.Server) {
@@ -140,7 +141,7 @@ func ReloadServers(servers []models.Server) {
 			jsonServer.Ping24 = ping24.Online
 		}
 
-		if ent, ok := favicons[jsonServer.Name]; ok {
+		if ent, ok := Favicons[jsonServer.Name]; ok {
 			jsonServer.Favicons = ent.Favicons
 			jsonServer.Favicon = ent.Favicon
 		}
@@ -220,11 +221,12 @@ func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 				server.Favicons = status.Favicons
 
 				storedFavicon := StoredFavicon{
-					Favicon:  server.Favicon,
-					Favicons: server.Favicons,
+					Favicon:     server.Favicon,
+					Favicons:    server.Favicons,
+					TimeWritten: time.Now(),
 				}
 
-				favicons[server.Name] = storedFavicon
+				Favicons[server.Name] = storedFavicon
 			}
 			server.Ping = int32(status.Ping)
 
