@@ -71,12 +71,14 @@ func ping(server *models.Server) {
 
 	// Ask the JSON side if we have a animated Favicon
 	fetchFavicon := true
+	fetchAnimated := server.DownloadAnimatedFavicon
 	if v, ok := json.Favicons[server.Name]; ok && time.Now().Sub(v.TimeWritten) < 60*time.Minute {
 		fetchFavicon = false
+		fetchAnimated = false
 	}
 
 	// Make ping
-	status, err := status.GetStatus(server.Ip, fetchFavicon)
+	status, err := status.GetStatus(server.Ip, fetchAnimated)
 	if err != nil {
 		beego.BeeLogger.Warn("Error while pinging: %v", err)
 
