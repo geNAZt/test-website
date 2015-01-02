@@ -9,6 +9,6 @@ type MainController struct {
 }
 
 func (c *MainController) Get() {
-	c.Data["host"] = "minecrafttracker.net"
+	c.Data["host"] = "localhost:8080"
 	c.TplNames = "index.tpl"
 }

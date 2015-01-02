@@ -24,7 +24,7 @@ func (j *JSONPingResponse) FillPings(days int32) {
 		From("ping").
 		Where("server_id = " + strconv.FormatInt(int64(j.Id), 10)).
 		OrderBy("time").
-		Asc().
+		Desc().
 		Limit(int(days * 24 * 60))
 
 	// Get the SQL Statement and execute it
