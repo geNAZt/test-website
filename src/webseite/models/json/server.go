@@ -75,7 +75,12 @@ var lock sync.RWMutex
 var Favicons *cache.TimeoutCache
 
 func init() {
-	Favicons = cache.NewFaviconCache()
+	tempCache, err := cache.NewFaviconCache()
+	if err != nil {
+		panic("Could not init favicon cache")
+	}
+
+	Favicons = tempCache
 }
 
 func ReloadServers(servers []models.Server) {
@@ -147,8 +152,8 @@ func ReloadServers(servers []models.Server) {
 		}
 
 		if ent, ok := Favicons.Get(jsonServer.Name); ok {
-			jsonServer.Favicons = ent.Favicons
-			jsonServer.Favicon = ent.Favicon
+			jsonServer.Favicons = ent.(StoredFavicon).Favicons
+			jsonServer.Favicon = ent.(StoredFavicon).Favicon
 		}
 
 		jsonServer.RecalcAverage()
