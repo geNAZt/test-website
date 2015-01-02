@@ -25,13 +25,8 @@ type Server struct {
 	Favicon    string
 	Ping       int32
 	Ping24     int32
-	Players    []Ping
+	Players    map[string]int32
 	Favicons   []status.Favicon `json:"-"`
-}
-
-type Ping struct {
-	Online int32
-	Time   int64
 }
 
 type JSONServerResponse struct {
@@ -96,8 +91,7 @@ func ReloadServers(servers []models.Server) {
 	for serverI := range servers {
 		sqlServer := servers[serverI]
 
-		jsonPings := []Ping{}
-		var jsonPing Ping
+		jsonPings := make(map[string]int32)
 
 		pastTime := time.Now().Add(-2 * 24 * 60 * time.Minute)
 
@@ -107,12 +101,7 @@ func ReloadServers(servers []models.Server) {
 				continue
 			}
 
-			jsonPing = Ping{
-				Online: sqlPing.Online,
-				Time:   sqlPing.Time.Unix(),
-			}
-
-			jsonPings = append(jsonPings, jsonPing)
+			jsonPings[strconv.FormatInt(sqlPing.Time.Unix(), 10)] = sqlPing.Online
 		}
 
 		// Get the database
@@ -143,7 +132,7 @@ func ReloadServers(servers []models.Server) {
 			IP:      sqlServer.Ip,
 			Name:    sqlServer.Name,
 			Website: sqlServer.Website,
-			Online:  jsonPing.Online,
+			Online:  sqlServer.Pings[len(sqlServer.Pings)-1].Online,
 			Players: jsonPings,
 		}
 

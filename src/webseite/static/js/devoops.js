@@ -117,12 +117,15 @@ function generateData(server) {
         server["Players"] = server["Players"].slice(server["Players"].length - time, server["Players"].length);
     }
 
-    server["Players"].forEach(function (ping) {
-        data.dataPoints.push({
-            x: ( ping["Time"] - offset ) * 1000,
-            y: ping["Online"]
-        });
-    });
+    serversCopy = servers;
+    for (var key in server["Players"]) {
+        if (server["Players"].hasOwnProperty(key)) {
+            data.dataPoints.push({
+                x: ( parseInt(key) - offset ) * 1000,
+                y: server["Players"][key]
+            });
+        }
+    }
 
     return data;
 }
