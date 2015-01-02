@@ -2,17 +2,16 @@ package websocket
 
 import (
 	"bytes"
-	"strings"
 	"time"
 	"webseite/models/json"
 	"webseite/websocket"
 )
 
 func init() {
-	go listen()
+	go listenAnimatedFavicon()
 }
 
-func listen() {
+func listenAnimatedFavicon() {
 	c := websocket.Hub.Listen(func(message websocket.Message) bool {
 		return bytes.Index(message.Message, []byte("animated:")) != -1
 	})
@@ -26,14 +25,12 @@ func listen() {
 }
 
 func displayAnimatedFavicon(m websocket.Message) {
-	message := string(m.Message)
-
-	if !strings.Contains(message, ":") {
+	serverId := ParseServerId(m)
+	if serverId == -1 {
 		return
 	}
 
-	servername := strings.Split(message, ":")[1]
-	server := json.GetServer(servername)
+	server := json.GetServer(serverId)
 	if server != nil && len(server.Favicons) > 1 {
 		for faviconI := range server.Favicons {
 			favicon := server.Favicons[faviconI]
@@ -42,7 +39,7 @@ func displayAnimatedFavicon(m websocket.Message) {
 				continue
 			}
 
-			json.SendFavicon(m.Connection, servername, favicon.Icon)
+			json.SendFavicon(m.Connection, serverId, favicon.Icon)
 			time.Sleep(time.Duration(favicon.DisplayTime) * time.Millisecond)
 		}
 	}

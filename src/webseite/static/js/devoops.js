@@ -38,30 +38,36 @@ var wsFuncs = {
 
         data.forEach(function (value) {
             value["Color"] = getColor();
-            servers[value["Name"]] = value;
-            options["data"].push(generateData(value));
+            servers[value["Id"]] = value;
+            conn.send("pings:" + value["Id"]);
         });
 
-        $("#chartContainer").CanvasJSChart().render();
         sortServers( true );
 
         $('#page-selection').bootpag({
             total: Math.ceil(sorted.length / 5)
-        }).on("page", function (event, /* page number here */ num) {
+        }).on("page", function (event, num) {
             skip = 5 * (num - 1);
             sortServers( true );
         });
     },
+    pings: function(data) {
+        servers[data["Id"]]["Players"] = data["Players"];
+        rerenderChart();
+    },
     updatePlayer: function (data) {
-        servers[data["Name"]]["Online"] = data["Online"];
-        servers[data["Name"]]["MaxPlayers"] = data["MaxPlayers"];
-        servers[data["Name"]]["Ping"] = data["Ping"];
-        servers[data["Name"]]["Ping24"] = data["Ping24"];
-        servers[data["Name"]]["Record"] = data["Record"];
-        servers[data["Name"]]["Average"] = data["Average"];
-        servers[data["Name"]]["Players"][data["Time"]] = data["Online"];
+        servers[data["Id"]]["Online"] = data["Online"];
+        servers[data["Id"]]["Ping"] = data["Ping"];
+        servers[data["Id"]]["Ping24"] = data["Ping24"];
+        servers[data["Id"]]["Record"] = data["Record"];
+        servers[data["Id"]]["Average"] = data["Average"];
+        servers[data["Id"]]["Players"][data["Time"]] = data["Online"];
 
         rerenderChart();
+        sortServers( false );
+    },
+    maxPlayer: function(data) {
+        servers[data["Id"]]["MaxPlayers"] = data["MaxPlayers"];
         sortServers( false );
     },
     favicon: function(data) {
@@ -299,6 +305,18 @@ $(document).ready(function () {
 
     var height = window.innerHeight - 49;
     $('#main').css('min-height', height);
+
+    $("#slider").slider({
+        range: "min",
+        value: 2,
+        min: 2,
+        max: 60,
+        slide: function( event, ui ) {
+            time = ui.value * 24 * 60;
+            options.title.text = "Last " + ui.value + " Days";
+            conn.send("range:" + ui.value)
+        }
+    });
 
     connectToWebSocket(host);
 });

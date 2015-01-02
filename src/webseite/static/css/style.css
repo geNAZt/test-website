@@ -2341,9 +2341,6 @@ td.beauty-hover {
   }
 }
 @media (max-width: 767px) {
-  #main {
-    margin-top: 100px;
-  }
   #messages-menu {
     top:140px;
   }

@@ -23,43 +23,45 @@ var (
 )
 
 func init() {
-	// Build up Auth Informations
-	opts := gophercloud.AuthOptions{
-		IdentityEndpoint: beego.AppConfig.String("OpenStackEndPoint"),
-		Username:         beego.AppConfig.String("OpenStackUser"),
-		Password:         beego.AppConfig.String("OpenStackPass"),
-		TenantID:         beego.AppConfig.String("OpenStackTenantId"),
+	if v, err := beego.AppConfig.Bool("OpenStackOn"); err == nil && v == true {
+		// Build up Auth Informations
+		opts := gophercloud.AuthOptions{
+			IdentityEndpoint: beego.AppConfig.String("OpenStackEndPoint"),
+			Username:         beego.AppConfig.String("OpenStackUser"),
+			Password:         beego.AppConfig.String("OpenStackPass"),
+			TenantID:         beego.AppConfig.String("OpenStackTenantId"),
+		}
+
+		// Check if we can auth
+		provider, err := openstack.AuthenticatedClient(opts)
+		if err != nil {
+			panic(err)
+		}
+
+		// Create new ObjectStorage Client
+		tempClient, err := openstack.NewObjectStorageV1(provider, gophercloud.EndpointOpts{
+			Region: beego.AppConfig.String("OpenStackRegion"),
+		})
+
+		// Check if we made an error
+		if err != nil {
+			panic(err)
+		}
+
+		// Store the client
+		client = tempClient
+
+		// Get the public cdn URL
+		url = beego.AppConfig.String("OpenStackCDNUrl")
+
+		// Build up cache
+		tempCache, err := cache.NewTimeoutCache(1600)
+		if err != nil {
+			panic(err)
+		}
+
+		existsCache = tempCache
 	}
-
-	// Check if we can auth
-	provider, err := openstack.AuthenticatedClient(opts)
-	if err != nil {
-		panic(err)
-	}
-
-	// Create new ObjectStorage Client
-	tempClient, err := openstack.NewObjectStorageV1(provider, gophercloud.EndpointOpts{
-		Region: beego.AppConfig.String("OpenStackRegion"),
-	})
-
-	// Check if we made an error
-	if err != nil {
-		panic(err)
-	}
-
-	// Store the client
-	client = tempClient
-
-	// Get the public cdn URL
-	url = beego.AppConfig.String("OpenStackCDNUrl")
-
-	// Build up cache
-	tempCache, err := cache.NewTimeoutCache(1600)
-	if err != nil {
-		panic(err)
-	}
-
-	existsCache = tempCache
 }
 
 func (s *openStackStorage) Store(storeBytes []byte, filename string) (bool, error) {

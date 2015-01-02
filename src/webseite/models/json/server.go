@@ -25,24 +25,17 @@ type Server struct {
 	Favicon    string
 	Ping       int32
 	Ping24     int32
-	Players    map[string]int32
 	Favicons   []status.Favicon `json:"-"`
 }
 
-type JSONServerResponse struct {
-	Ident string
-	Value []Server
-}
-
 type PlayerUpdate struct {
-	Name       string
-	Online     int32
-	MaxPlayers int32
-	Time       int64
-	Ping       int32
-	Ping24     int32
-	Record     int32
-	Average    int32
+	Id      int32
+	Online  int32
+	Time    int64
+	Ping    int32
+	Ping24  int32
+	Record  int32
+	Average int32
 }
 
 type JSONUpdatePlayerResponse struct {
@@ -56,8 +49,8 @@ type JSONUpdateFaviconResponse struct {
 }
 
 type ServerFavicon struct {
-	Server string
-	Icon   string
+	Id   int32
+	Icon string
 }
 
 type StoredFavicon struct {
@@ -65,7 +58,7 @@ type StoredFavicon struct {
 	Favicons []status.Favicon
 }
 
-var Servers JSONServerResponse
+var Servers JSONResponse
 var lock sync.RWMutex
 var Favicons *cache.TimeoutCache
 
@@ -82,27 +75,13 @@ func ReloadServers(servers []models.Server) {
 	lock.Lock()
 	defer lock.Unlock()
 
-	Servers = JSONServerResponse{
+	Servers = JSONResponse{
 		Ident: "servers",
+		Value: []Server{},
 	}
-
-	Servers.Value = []Server{}
 
 	for serverI := range servers {
 		sqlServer := servers[serverI]
-
-		jsonPings := make(map[string]int32)
-
-		pastTime := time.Now().Add(-2 * 24 * 60 * time.Minute)
-
-		for pingI := range sqlServer.Pings {
-			sqlPing := sqlServer.Pings[(len(sqlServer.Pings)-1)-pingI]
-			if sqlPing.Time.Before(pastTime) {
-				continue
-			}
-
-			jsonPings[strconv.FormatInt(sqlPing.Time.Unix(), 10)] = sqlPing.Online
-		}
 
 		// Get the database
 		o := orm.NewOrm()
@@ -133,7 +112,6 @@ func ReloadServers(servers []models.Server) {
 			Name:    sqlServer.Name,
 			Website: sqlServer.Website,
 			Online:  sqlServer.Pings[len(sqlServer.Pings)-1].Online,
-			Players: jsonPings,
 		}
 
 		if ping24 != nil {
@@ -147,7 +125,7 @@ func ReloadServers(servers []models.Server) {
 
 		jsonServer.RecalcAverage()
 		jsonServer.RecalcRecord()
-		Servers.Value = append(Servers.Value, jsonServer)
+		Servers.Value = append(Servers.Value.([]Server), jsonServer)
 	}
 }
 
@@ -164,7 +142,7 @@ func SendAllServers(c *websocket.Connection) {
 	c.Send <- jsonBytes
 }
 
-func SendFavicon(c *websocket.Connection, servername, favicon string) {
+func SendFavicon(c *websocket.Connection, serverId int32, favicon string) {
 	defer func() {
 		recover()
 	}()
@@ -172,8 +150,8 @@ func SendFavicon(c *websocket.Connection, servername, favicon string) {
 	fav := JSONUpdateFaviconResponse{
 		Ident: "favicon",
 		Value: ServerFavicon{
-			Icon:   favicon,
-			Server: servername,
+			Icon: favicon,
+			Id:   serverId,
 		},
 	}
 
@@ -186,10 +164,10 @@ func SendFavicon(c *websocket.Connection, servername, favicon string) {
 	c.Send <- jsonBytes
 }
 
-func GetServer(name string) *Server {
-	for serverI := range Servers.Value {
-		server := &Servers.Value[serverI]
-		if server.Name == name {
+func GetServer(id int32) *Server {
+	for serverI := range Servers.Value.([]Server) {
+		server := &Servers.Value.([]Server)[serverI]
+		if server.Id == id {
 			return server
 		}
 	}
@@ -206,15 +184,15 @@ func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 	online := int32(status.Players.Online)
 	max := int32(status.Players.Max)
 
-	for serverI := range Servers.Value {
-		server := &Servers.Value[serverI]
+	for serverI := range Servers.Value.([]Server) {
+		server := &Servers.Value.([]Server)[serverI]
 
 		if server.Id == id {
 			server.RecalcRecord()
 			server.RecalcAverage()
 
 			server.Online = online
-			server.MaxPlayers = max
+
 			if status.Favicon != "" {
 				server.Favicon = status.Favicon
 				server.Favicons = status.Favicons
@@ -232,14 +210,23 @@ func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 			jsonPlayerUpdate := JSONUpdatePlayerResponse{
 				Ident: "updatePlayer",
 				Value: PlayerUpdate{
-					Name:       server.Name,
-					Online:     online,
-					MaxPlayers: max,
-					Time:       time.Now().Unix() - int64(offset),
-					Ping:       server.Ping,
-					Average:    server.Average,
-					Record:     server.Record,
+					Id:      server.Id,
+					Online:  online,
+					Time:    time.Now().Unix() - int64(offset),
+					Ping:    server.Ping,
+					Average: server.Average,
+					Record:  server.Record,
 				},
+			}
+
+			if server.MaxPlayers != max {
+				jsonMaxPlayer := &JSONMaxPlayerResponse{
+					Id:         server.Id,
+					MaxPlayers: max,
+				}
+
+				jsonMaxPlayer.Broadcast()
+				server.MaxPlayers = max
 			}
 
 			if ping24 != nil {

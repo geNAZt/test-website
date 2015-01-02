@@ -69,6 +69,7 @@
 
                     </table>
                 </div>
+                <div id="slider"></div>
                 <div id="chartContainer" style="height: 800px; width: 100%;"></div>
             </div>
         </div>
