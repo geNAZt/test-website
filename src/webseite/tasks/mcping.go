@@ -31,7 +31,7 @@ func InitTasks() {
 
 	// Load
 	for serverI := range servers {
-		o.LoadRelated(&servers[serverI], "Pings", 0, 2*24*60, 0, "-Time")
+		o.LoadRelated(&servers[serverI].Pings, "Pings", 0, 6*31*24*60, 0, "-Time")
 	}
 
 	// Reload the JSON side
@@ -44,7 +44,7 @@ func InitTasks() {
 
 		// Load
 		for serverI := range servers {
-			o.LoadRelated(&servers[serverI], "Pings", 0, 2*24*60, 0, "-Time")
+			o.LoadRelated(&servers[serverI], "Pings", 0, 6*31*24*60, 0, "-Time")
 		}
 
 		// Reload the JSON side

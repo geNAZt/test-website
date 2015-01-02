@@ -94,8 +94,13 @@ func ReloadServers(servers []models.Server) {
 		jsonPings := []Ping{}
 		var jsonPing Ping
 
+		pastTime := time.Now().Add(-2 * 24 * 60 * time.Minute)
+
 		for pingI := range sqlServer.Pings {
 			sqlPing := sqlServer.Pings[(len(sqlServer.Pings)-1)-pingI]
+			if sqlPing.Time.Before(pastTime) {
+				continue
+			}
 
 			jsonPing = Ping{
 				Online: sqlPing.Online,
