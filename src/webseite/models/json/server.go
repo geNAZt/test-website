@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"sync"
 	"time"
+	"webseite/cache"
 	"webseite/models"
 	"webseite/websocket"
 )
@@ -65,17 +66,16 @@ type ServerFavicon struct {
 }
 
 type StoredFavicon struct {
-	Favicon     string
-	Favicons    []status.Favicon
-	TimeWritten time.Time
+	Favicon  string
+	Favicons []status.Favicon
 }
 
 var Servers JSONServerResponse
 var lock sync.RWMutex
-var Favicons map[string]StoredFavicon
+var Favicons *cache.TimeoutCache
 
 func init() {
-	Favicons = make(map[string]StoredFavicon)
+	Favicons = cache.NewFaviconCache()
 }
 
 func ReloadServers(servers []models.Server) {
@@ -146,7 +146,7 @@ func ReloadServers(servers []models.Server) {
 			jsonServer.Ping24 = ping24.Online
 		}
 
-		if ent, ok := Favicons[jsonServer.Name]; ok {
+		if ent, ok := Favicons.Get(jsonServer.Name); ok {
 			jsonServer.Favicons = ent.Favicons
 			jsonServer.Favicon = ent.Favicon
 		}
@@ -226,13 +226,13 @@ func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 				server.Favicons = status.Favicons
 
 				storedFavicon := StoredFavicon{
-					Favicon:     server.Favicon,
-					Favicons:    server.Favicons,
-					TimeWritten: time.Now(),
+					Favicon:  server.Favicon,
+					Favicons: server.Favicons,
 				}
 
-				Favicons[server.Name] = storedFavicon
+				Favicons.Add(server.Name, storedFavicon)
 			}
+
 			server.Ping = int32(status.Ping)
 
 			jsonPlayerUpdate := JSONUpdatePlayerResponse{
