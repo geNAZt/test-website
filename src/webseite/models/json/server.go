@@ -95,7 +95,7 @@ func ReloadServers(servers []models.Server) {
 		var jsonPing Ping
 
 		for pingI := range sqlServer.Pings {
-			sqlPing := sqlServer.Pings[len(sqlServer.Pings) - pingI]
+			sqlPing := sqlServer.Pings[(len(sqlServer.Pings)-1)-pingI]
 
 			jsonPing = Ping{
 				Online: sqlPing.Online,
