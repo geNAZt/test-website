@@ -9,6 +9,7 @@ var colorArray = ["#5ca1c8", "#e42570", "#ced8b5", "#8774de", "#b8a0d0", "#7a645
 var currentColorI = 0;
 var time = 2 * 24 * 60;
 var favicons = {};
+var sendTimeout = -1;
 
 //Better to construct options first and then pass it as a parameter
 var options = {
@@ -116,13 +117,32 @@ function generateData(server) {
         dataPoints: []
     };
 
-    if ( server["Players"].length > time ) {
-        server["Players"] = server["Players"].slice(server["Players"].length - time, server["Players"].length);
+    length = Object.keys(server["Players"]).length;
+
+    skip = 0;
+
+    if ( length > 3000 ) {
+        skip = ( length - 3000 ) / 3000;
     }
+
+    counter = 0;
+    currentTime = new Date().getTime();
 
     serversCopy = servers;
     for (var key in server["Players"]) {
+        if (skip > counter) {
+            counter++;
+            continue;
+        }
+
+        counter = 0;
+
         if (server["Players"].hasOwnProperty(key)) {
+            valueTime = ( parseInt(key) - offset ) * 1000;
+            if (currentTime - valueTime > time * 60 * 1000) {
+                continue;
+            }
+
             data.dataPoints.push({
                 x: ( parseInt(key) - offset ) * 1000,
                 y: server["Players"][key]
@@ -314,7 +334,13 @@ $(document).ready(function () {
         slide: function( event, ui ) {
             time = ui.value * 24 * 60;
             options.title.text = "Last " + ui.value + " Days";
-            conn.send("range:" + ui.value)
+
+            if ( sendTimeout == -1 ) {
+                sendTimeout = window.setTimeout(function() {
+                    conn.send("range:" + time / (24*60));
+                    sendTimeout = -1;
+                }, 1000)
+            }
         }
     });
 
