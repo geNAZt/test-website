@@ -29,8 +29,9 @@ func sendRangePings(m websocket.Message) {
 		return
 	}
 
-	for serverI := range json.Servers.Value.([]json.Server) {
-		jsonServer := json.Servers.Value.([]json.Server)[serverI]
+	servers := json.Servers.Value.([]json.Server)
+	for serverI := range servers {
+		jsonServer := servers[serverI]
 
 		jsonPings := &json.JSONPingResponse{
 			Id: jsonServer.Id,
