@@ -22,6 +22,10 @@ func (j *JSONResponse) marshal() []byte {
 }
 
 func (j *JSONResponse) Send(c *websocket.Connection) {
+	defer func() {
+		recover()
+	}()
+
 	by := j.marshal()
 	if len(by) != 0 {
 		c.Send <- by
