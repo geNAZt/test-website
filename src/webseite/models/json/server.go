@@ -280,6 +280,8 @@ func (s *Server) RecalcAverage() {
 	qb.Select("*").
 		From("ping").
 		Where("server_id = " + strconv.FormatInt(int64(s.Id), 10)).
+		OrderBy("time").
+		Desc().
 		Limit(60 * 24)
 
 	// Get the SQL Statement and execute it
