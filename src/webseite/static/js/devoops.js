@@ -64,6 +64,17 @@ var wsFuncs = {
         servers[data["Id"]]["Average"] = data["Average"];
         servers[data["Id"]]["Players"][data["Time"]] = data["Online"];
 
+        newData = {};
+        lowDate = data["Time"] - time;
+
+        for (var key in servers[data["Id"]]["Players"]) {
+            if (servers[data["Id"]]["Players"].hasOwnProperty(key) && key >= lowDate) {
+                newData[key] = servers[data["Id"]]["Players"][key];
+            }
+        }
+
+        servers[data["Id"]]["Players"] = newData;
+
         rerenderChart();
         sortServers( false );
     },
