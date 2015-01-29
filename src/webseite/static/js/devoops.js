@@ -65,7 +65,7 @@ var wsFuncs = {
         servers[data["Id"]]["Players"][data["Time"]] = data["Online"];
 
         newData = {};
-        lowDate = data["Time"] - time;
+        lowDate = data["Time"] - ( time * 60 );
 
         for (var key in servers[data["Id"]]["Players"]) {
             if (servers[data["Id"]]["Players"].hasOwnProperty(key) && key >= lowDate) {
