@@ -128,6 +128,10 @@ function generateData(server) {
         dataPoints: []
     };
 
+    if ( server["Players"] == undefined ) {
+        return data;
+    }
+
     length = Object.keys(server["Players"]).length;
 
     skip = 0;

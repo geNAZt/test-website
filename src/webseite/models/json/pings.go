@@ -42,4 +42,25 @@ func (j *JSONPingResponse) FillPings(days int32) {
 
 		j.Players[strconv.FormatInt(pingI, 10)] = sqlPing
 	}
+
+	length := len(j.Players)
+	skip := 0
+
+	if length > 3000 {
+		skip = (length - 3000) / 3000
+	}
+
+	tempMap := make(map[string]int32)
+	counter := 0
+	for playerI := range j.Players {
+		if skip > counter {
+			counter++
+			continue
+		}
+
+		counter = 0
+		tempMap[playerI] = j.Players[playerI]
+	}
+
+	j.Players = tempMap
 }
