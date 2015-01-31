@@ -30,8 +30,9 @@ func (j *JSONPingResponse) FillPings(days int32) {
 	pings := pingCache.Players[j.Id]
 
 	// Construct pasttime and the map
+	_, offset := time.Now().Zone()
 	j.Players = make(map[string]int32)
-	pastTime := time.Now().Add(time.Duration(-days*24*60) * time.Minute).Unix()
+	pastTime := (time.Now().Add(time.Duration(-days*24*60) * time.Minute).Unix()) - int64(offset)
 
 	// Select the pings we need to fill in
 	for pingI := range pings {
