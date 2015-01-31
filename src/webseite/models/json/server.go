@@ -196,7 +196,7 @@ func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 
 			server.Ping = int32(status.Ping)
 
-			AddPing(server.Id, time.Now().Unix(), online)
+			AddPing(server.Id, time.Now().Unix()-int64(offset), online)
 
 			jsonPlayerUpdate := JSONUpdatePlayerResponse{
 				Ident: "updatePlayer",
