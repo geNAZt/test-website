@@ -35,7 +35,7 @@ func (j *JSONPingResponse) FillPings(days int32) {
 
 	// Select the pings we need to fill in
 	for pingI := range pings {
-		sqlPing := pings[int64(len(pings)-1)-pingI]
+		sqlPing := pings[pingI]
 		if pingI < pastTime {
 			continue
 		}
