@@ -3,8 +3,11 @@ package models
 import "github.com/astaxie/beego/orm"
 
 type User struct {
-	Id   int
-	Name string
+	Id       int32 `orm:"auto"`
+	Email    string
+	Salt     string
+	PassHash string
+	Avatar   string
 }
 
 func init() {

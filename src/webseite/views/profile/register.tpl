@@ -23,12 +23,8 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="{{ "plugins/bootstrap/bootstrap.min.js" | asset }}"></script>
     <!-- All functions for this theme + document.ready processing -->
-    <script src="{{ "js/devoops.js" | asset }}"></script>
     <script src="{{ "js/jquery.canvasjs.min.js" | asset }}"></script>
     <script src="{{ "js/jquery.bootpag.min.js" | asset }}"></script>
-    <script type="text/javascript">
-        host = {{ .host }};
-    </script>
 
     <script>
         (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -104,28 +100,30 @@
     <div class="row">
         <!--Start Content-->
         <div id="content" class="col-xs-12 col-sm-12">
-            <div id="inner-content" class="col-xs-10 col-sm-10">
-                <br/>
-
-                {{ if isset .flash "registerComplete" }}
-                <p id="flash-register" class="txt-success" style="text-align: center;">{{ .flash.registerComplete }}</p>
-                <script type="application/javascript">
-                    setTimeout(function() {
-                        $('#flash-register').fadeOut();
-                    }, 5000);
-                </script>
-                {{ end }}
-
-                <h2 class="table-header">Tracked Servers</h2>
-
-                <div id="page-selection"></div>
-                <div id="server-table" class="table-responsive">
-                    <table class="table table-hover">
-
-                    </table>
+            <div id="inner-content" class="col-xs-4 col-sm-4">
+                <div class="box">
+                    <div class="box-content">
+                        <form action="/profile/register/" method="POST" enctype="application/x-www-form-urlencoded">
+                            <div class="text-center">
+                                <h3 class="page-header">MineTracker Register Page</h3>
+                                <p class="txt-info">You can create custom Graphs using the Servers you want to see</p>
+                            </div>
+                            <div class="form-group{{ if isset .errors "email" }} has-error{{ end }}">
+                                <label class="control-label">E-mail</label>
+                                <input type="text" class="form-control" name="email" value="{{ .lastEmail }}">
+                                {{ if isset .errors "email" }}<p class="txt-danger">{{ .errors.email }}</p>{{ end }}
+                            </div>
+                            <div class="form-group{{ if isset .errors "password" }} has-error{{ end }}">
+                                <label class="control-label">Password</label>
+                                <input type="password" class="form-control" name="password">
+                                {{ if isset .errors "password" }}<p class="txt-danger">{{ .errors.password }}</p>{{ end }}
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary">Register</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div id="slider"></div>
-                <div id="chartContainer" style="height: 800px; width: 100%;"></div>
             </div>
         </div>
         <!--End Content-->
