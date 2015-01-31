@@ -58,7 +58,7 @@ type StoredFavicon struct {
 	Favicons []status.Favicon
 }
 
-var Servers JSONResponse
+var Servers map[int32]Server
 var lock sync.RWMutex
 var Favicons *cache.TimeoutCache
 
@@ -69,16 +69,12 @@ func init() {
 	}
 
 	Favicons = tempCache
+	Servers = make(map[int32]Server)
 }
 
 func ReloadServers(servers []models.Server) {
 	lock.Lock()
 	defer lock.Unlock()
-
-	Servers = JSONResponse{
-		Ident: "servers",
-		Value: []Server{},
-	}
 
 	for serverI := range servers {
 		sqlServer := servers[serverI]
@@ -114,15 +110,27 @@ func ReloadServers(servers []models.Server) {
 
 		jsonServer.RecalcAverage()
 		jsonServer.RecalcRecord()
-		Servers.Value = append(Servers.Value.([]Server), jsonServer)
+		Servers[jsonServer.Id] = jsonServer
 	}
 }
 
-func SendAllServers(c *websocket.Connection) {
+func SendAllServers(c *websocket.Connection, view *models.View) {
 	lock.RLock()
 	defer lock.RUnlock()
 
-	jsonBytes, err := gojson.Marshal(Servers)
+	jsonResponse := JSONResponse{
+		Ident: "servers",
+		Value: []Server{},
+	}
+
+	for serverI := range view.Servers {
+		server := GetServer(view.Servers[serverI].Id)
+		if server.Id != -1 {
+			jsonResponse.Value = append(jsonResponse.Value.([]Server), server)
+		}
+	}
+
+	jsonBytes, err := gojson.Marshal(jsonResponse)
 	if err != nil {
 		beego.BeeLogger.Warn("Could not convert to json: %v", err)
 		return
@@ -153,15 +161,14 @@ func SendFavicon(c *websocket.Connection, serverId int32, favicon string) {
 	c.Send <- jsonBytes
 }
 
-func GetServer(id int32) *Server {
-	for serverI := range Servers.Value.([]Server) {
-		server := &Servers.Value.([]Server)[serverI]
-		if server.Id == id {
-			return server
-		}
+func GetServer(id int32) Server {
+	if server, ok := Servers[id]; ok {
+		return server
 	}
 
-	return nil
+	return Server{
+		Id: -1,
+	}
 }
 
 func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
@@ -173,67 +180,65 @@ func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 	online := int32(status.Players.Online)
 	max := int32(status.Players.Max)
 
-	for serverI := range Servers.Value.([]Server) {
-		server := &Servers.Value.([]Server)[serverI]
-
-		if server.Id == id {
-			server.RecalcRecord()
-			server.RecalcAverage()
-
-			server.Online = online
-
-			if status.Favicon != "" {
-				server.Favicon = status.Favicon
-				server.Favicons = status.Favicons
-
-				storedFavicon := StoredFavicon{
-					Favicon:  server.Favicon,
-					Favicons: server.Favicons,
-				}
-
-				Favicons.Add(server.Name, storedFavicon)
-			}
-
-			server.Ping = int32(status.Ping)
-
-			AddPing(server.Id, time.Now().Unix()-int64(offset), online)
-
-			jsonPlayerUpdate := JSONUpdatePlayerResponse{
-				Ident: "updatePlayer",
-				Value: PlayerUpdate{
-					Id:      server.Id,
-					Online:  online,
-					Time:    time.Now().Unix() - int64(offset),
-					Ping:    server.Ping,
-					Average: server.Average,
-					Record:  server.Record,
-				},
-			}
-
-			if server.MaxPlayers != max {
-				jsonMaxPlayer := &JSONMaxPlayerResponse{
-					Id:         server.Id,
-					MaxPlayers: max,
-				}
-
-				jsonMaxPlayer.Broadcast()
-				server.MaxPlayers = max
-			}
-
-			if ping24 != nil {
-				jsonPlayerUpdate.Value.Ping24 = ping24.Online
-			}
-
-			jsonBytes, err := gojson.Marshal(jsonPlayerUpdate)
-			if err != nil {
-				beego.BeeLogger.Warn("Could not convert to json: %v", err)
-				return
-			}
-
-			websocket.Hub.Broadcast <- jsonBytes
-			return
-		}
+	server, ok := Servers[id]
+	if !ok {
+		return
 	}
+
+	server.RecalcRecord()
+	server.RecalcAverage()
+
+	server.Online = online
+
+	if status.Favicon != "" {
+		server.Favicon = status.Favicon
+		server.Favicons = status.Favicons
+
+		storedFavicon := StoredFavicon{
+			Favicon:  server.Favicon,
+			Favicons: server.Favicons,
+		}
+
+		Favicons.Add(server.Name, storedFavicon)
+	}
+
+	server.Ping = int32(status.Ping)
+
+	AddPing(server.Id, time.Now().Unix()-int64(offset), online)
+
+	jsonPlayerUpdate := JSONUpdatePlayerResponse{
+		Ident: "updatePlayer",
+		Value: PlayerUpdate{
+			Id:      server.Id,
+			Online:  online,
+			Time:    time.Now().Unix() - int64(offset),
+			Ping:    server.Ping,
+			Average: server.Average,
+			Record:  server.Record,
+		},
+	}
+
+	if server.MaxPlayers != max {
+		jsonMaxPlayer := &JSONMaxPlayerResponse{
+			Id:         server.Id,
+			MaxPlayers: max,
+		}
+
+		jsonMaxPlayer.Broadcast()
+		server.MaxPlayers = max
+	}
+
+	if ping24 != nil {
+		jsonPlayerUpdate.Value.Ping24 = ping24.Online
+	}
+
+	jsonBytes, err := gojson.Marshal(jsonPlayerUpdate)
+	if err != nil {
+		beego.BeeLogger.Warn("Could not convert to json: %v", err)
+		return
+	}
+
+	websocket.Hub.Broadcast <- jsonBytes
 }
 
 func (s *Server) RecalcRecord() {

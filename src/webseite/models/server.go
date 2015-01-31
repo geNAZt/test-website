@@ -10,6 +10,7 @@ type Server struct {
 	Record                  int32
 	DownloadAnimatedFavicon bool
 	Pings                   []*Ping `orm:"reverse(many)"`
+	Views                   []*View `orm:"rel(m2m)"`
 }
 
 func init() {

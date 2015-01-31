@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/orm"
+	"webseite/models"
 	"webseite/models/json"
 	"webseite/websocket"
 )
@@ -16,6 +18,24 @@ func (w *WSController) Get() {
 
 	conn := websocket.Upgrade(w.Controller)
 
+	// Get the default View
+	// ORM
+	o := orm.NewOrm()
+	o.Using("default")
+
+	// Build up the Query
+	qb, _ := orm.NewQueryBuilder("mysql")
+	qb.Select("*").
+		From("view").
+		Where("`id` = ?")
+
+	// Get the SQL Statement and execute it
+	sql := qb.String()
+	view := &models.View{}
+	o.Raw(sql, 1).QueryRow(&view)
+
+	o.LoadRelated(view, "Servers")
+
 	// Send this Client all known Servers
-	json.SendAllServers(conn)
+	json.SendAllServers(conn, view)
 }

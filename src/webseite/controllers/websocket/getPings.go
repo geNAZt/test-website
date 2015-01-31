@@ -30,7 +30,7 @@ func sendPings(m websocket.Message) {
 	}
 
 	server := json.GetServer(int32(serverId))
-	if server != nil {
+	if server.Id != -1 {
 		jsonPings := &json.JSONPingResponse{
 			Id: server.Id,
 		}
