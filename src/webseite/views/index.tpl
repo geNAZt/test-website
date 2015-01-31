@@ -90,9 +90,9 @@
                                 <span>Logout</span>
                             </a>
                         </li>
-                    </ul>-->
+                    </ul>
                     <span class="btn btn-success btn-login"><a href="/login/">Login</a></span>
-                    <span class="btn btn-danger btn-login"><a href="/profile/register/">Register</a></span>
+                    <span class="btn btn-danger btn-login"><a href="/profile/register/">Register</a></span>-->
                 </li>
             </ul>
         </div>
