@@ -83,27 +83,16 @@ func ReloadServers(servers []models.Server) {
 	for serverI := range servers {
 		sqlServer := servers[serverI]
 
-		// Get the database
-		o := orm.NewOrm()
-		o.Using("default")
+		pings := sqlServer.Pings
 
-		// Load the 24 hour before ping
-		// Build up the Query
-		qb, _ := orm.NewQueryBuilder("mysql")
-		qb.Select("*").
-			From("ping").
-			Where("server_id = " + strconv.FormatInt(int64(sqlServer.Id), 10)).
-			Limit(1).
-			Offset(24 * 60)
-
-		// Get the SQL Statement and execute it
-		sql := qb.String()
-		pings := []models.Ping{}
-		o.Raw(sql).QueryRows(&pings)
+		for pingI := range pings {
+			ping := pings[pingI]
+			AddPing(sqlServer.Id, ping.Time.Unix(), ping.Online)
+		}
 
 		var ping24 *models.Ping
 		if len(pings) > 0 {
-			ping24 = &pings[0]
+			ping24 = pings[0]
 		}
 
 		jsonServer := Server{
@@ -206,6 +195,8 @@ func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 			}
 
 			server.Ping = int32(status.Ping)
+
+			AddPing(server.Id, time.Now().Unix(), online)
 
 			jsonPlayerUpdate := JSONUpdatePlayerResponse{
 				Ident: "updatePlayer",

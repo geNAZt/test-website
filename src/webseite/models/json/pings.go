@@ -1,10 +1,8 @@
 package json
 
 import (
-	"github.com/astaxie/beego/orm"
 	"strconv"
 	"time"
-	"webseite/models"
 )
 
 type JSONPingResponse struct {
@@ -12,37 +10,36 @@ type JSONPingResponse struct {
 	Players map[string]int32
 }
 
+type PingCache struct {
+	Players map[int32]map[int64]int32
+}
+
+var pingCache = PingCache{
+	Players: make(map[int32]map[int64]int32),
+}
+
+func AddPing(id int32, time int64, players int32) {
+	if _, ok := pingCache.Players[id]; !ok {
+		pingCache.Players[id] = make(map[int64]int32)
+	}
+
+	pingCache.Players[id][time] = players
+}
+
 func (j *JSONPingResponse) FillPings(days int32) {
-	// Get the database
-	o := orm.NewOrm()
-	o.Using("default")
-
-	// Load the 24 hour before ping
-	// Build up the Query
-	qb, _ := orm.NewQueryBuilder("mysql")
-	qb.Select("*").
-		From("ping").
-		Where("server_id = " + strconv.FormatInt(int64(j.Id), 10)).
-		OrderBy("time").
-		Desc().
-		Limit(int(days * 24 * 60))
-
-	// Get the SQL Statement and execute it
-	sql := qb.String()
-	pings := []models.Ping{}
-	o.Raw(sql).QueryRows(&pings)
+	pings := pingCache.Players[j.Id]
 
 	// Construct pasttime and the map
 	j.Players = make(map[string]int32)
-	pastTime := time.Now().Add(time.Duration(-days*24*60) * time.Minute)
+	pastTime := time.Now().Add(time.Duration(-days*24*60) * time.Minute).Unix()
 
 	// Select the pings we need to fill in
 	for pingI := range pings {
-		sqlPing := pings[(len(pings)-1)-pingI]
-		if sqlPing.Time.Before(pastTime) {
+		sqlPing := pings[int64(len(pings)-1)-pingI]
+		if pingI < pastTime {
 			continue
 		}
 
-		j.Players[strconv.FormatInt(sqlPing.Time.Unix(), 10)] = sqlPing.Online
+		j.Players[strconv.FormatInt(pingI, 10)] = sqlPing
 	}
 }
