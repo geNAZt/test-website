@@ -141,9 +141,9 @@ func init() {
 
 func main() {
 	// Check if we are in dev env
-	if beego.AppConfig.String("runmode") == "dev" {
+	/*if beego.AppConfig.String("runmode") == "dev" {
 		orm.Debug = true
-	}
+	}*/
 
 	// Error.
 	err := orm.RunSyncdb("default", false, false)

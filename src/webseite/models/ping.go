@@ -9,7 +9,6 @@ type Ping struct {
 	Id     int32   `orm:"auto"`
 	Server *Server `orm:"rel(fk)"`
 	Online int32
-	Ping   int64
 	Time   time.Time `orm:"auto_now"`
 }
 

@@ -101,7 +101,6 @@ func ping(server *models.Server) {
 	ping := &models.Ping{
 		Server: server,
 		Online: int32(status.Players.Online),
-		Ping:   int64(status.Ping),
 		Time:   time.Now(),
 	}
 

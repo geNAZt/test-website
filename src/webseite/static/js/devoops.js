@@ -58,7 +58,6 @@ var wsFuncs = {
     },
     updatePlayer: function (data) {
         servers[data["Id"]]["Online"] = data["Online"];
-        servers[data["Id"]]["Ping"] = data["Ping"];
         servers[data["Id"]]["Ping24"] = data["Ping24"];
         servers[data["Id"]]["Record"] = data["Record"];
         servers[data["Id"]]["Average"] = data["Average"];
@@ -128,16 +127,12 @@ function generateData(server) {
         dataPoints: []
     };
 
-    if ( server["Players"] == undefined ) {
-        return data;
-    }
-
     length = Object.keys(server["Players"]).length;
 
-    skip = 0;
+    skipData = 0;
 
     if ( length > 3000 ) {
-        skip = ( length - 3000 ) / 3000;
+        skipData = ( length - 3000 ) / 3000;
     }
 
     counter = 0;
@@ -145,7 +140,7 @@ function generateData(server) {
 
     serversCopy = servers;
     for (var key in server["Players"]) {
-        if (skip > counter) {
+        if (skipData > counter) {
             counter++;
             continue;
         }
@@ -199,7 +194,7 @@ function renderTable( renderAnimatedFavicons ) {
 }
 
 function createTH() {
-    return "<thead><tr><th></th><th>ID</th><th>Server Name</th><th>Minecraft IP</th><th>Website</th><th>Players</th><th>Record</th><th>Average (24h)</th><th>Ping</th></tr></thead>";
+    return "<thead><tr><th></th><th>ID</th><th>Server Name</th><th>Minecraft IP</th><th>Website</th><th>Players</th><th>Record</th><th>Average (24h)</th></tr></thead>";
 }
 
 function createTR(server, renderAnimatedFavicons) {
@@ -285,12 +280,6 @@ function createTR(server, renderAnimatedFavicons) {
     averageTd = $('<td />');
     averageTd.text(server["Average"] + " Players");
     tr.append(averageTd);
-
-    // Ping
-    pingMS = Math.ceil(server["Ping"] / 1000000);
-    pingTd = $('<td />');
-    pingTd.text(pingMS + " ms");
-    tr.append(pingTd);
 
     return tr;
 }

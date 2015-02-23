@@ -6,6 +6,7 @@ import (
 	valid "github.com/asaskevich/govalidator"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"webseite/mail"
 	"webseite/models"
 	util "webseite/util"
 )
@@ -48,13 +49,13 @@ func (c *ProfileRegisterController) Post() {
 	pass := c.GetString("password")
 
 	c.SetSession("profile.register.lastEmail", email)
+	error := false
 
 	// Check for a valid E-Mail
 	if email != "" {
 		if !valid.IsEmail(email) {
 			c.SetSession("profile.emailError", "E-Mail is not valid")
-			c.Redirect("/profile/register/", 302)
-			return
+			error = true
 		} else {
 			// Build up the Query
 			qb, _ := orm.NewQueryBuilder("mysql")
@@ -69,19 +70,21 @@ func (c *ProfileRegisterController) Post() {
 
 			if len(user) > 0 {
 				c.SetSession("profile.emailError", "E-Mail is already registered")
-				c.Redirect("/profile/register/", 302)
-				return
+				error = true
 			}
 		}
 	} else {
 		c.SetSession("profile.emailError", "E-Mail is empty")
-		c.Redirect("/profile/register/", 302)
-		return
+		error = true
 	}
 
 	// Check for a valid Password
 	if pass == "" {
 		c.SetSession("profile.passwordError", "Password is empty")
+		error = true
+	}
+
+	if error {
 		c.Redirect("/profile/register/", 302)
 		return
 	}
@@ -92,17 +95,28 @@ func (c *ProfileRegisterController) Post() {
 	hasher.Write([]byte(salt))
 	hasher.Write([]byte(pass))
 
+	// Generate access token
+	acceptToken := util.RandomString(64)
+
+	data := make(map[string]string)
+	data["acceptToken"] = acceptToken
+	errMail := mail.SendTemplateMail(email, "acceptToken", data)
+	if errMail != nil {
+		beego.BeeLogger.Warning("%v", errMail)
+	}
+
 	// New user
 	user := &models.User{
-		Email:    email,
-		Salt:     salt,
-		PassHash: base64.URLEncoding.EncodeToString(hasher.Sum(nil)),
-		Avatar:   "default",
+		Email:       email,
+		Salt:        salt,
+		PassHash:    base64.URLEncoding.EncodeToString(hasher.Sum(nil)),
+		Avatar:      "default",
+		AcceptToken: acceptToken,
 	}
 	o.Insert(user)
 
 	// Flash for MainPage
-	c.SetSession("profile.registerComplete", "Your registration has been completed")
+	c.SetSession("profile.registerComplete", "Your registration has been completed. Please check your Inbox for activation")
 
 	// Redirect back to the Mainpage
 	c.Redirect("/", 302)

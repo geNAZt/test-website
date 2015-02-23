@@ -25,6 +25,6 @@ func (c *MainController) Get() {
 	}
 
 	c.Data["flash"] = flashes
-	c.Data["host"] = "minecrafttracker.net"
+	c.Data["host"] = "localhost:8080"
 	c.TplNames = "index.tpl"
 }

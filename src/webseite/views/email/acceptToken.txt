@@ -1,0 +1,9 @@
+Your registration for minecrafttracker.net
+
+Hello,
+
+you registered yourself on minecrafttracker.net. To activate your Account please click on this link:
+
+http://minecrafttracker.net/profile/accept/{{ .acceptToken }}
+
+Thanks

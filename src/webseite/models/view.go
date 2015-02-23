@@ -6,6 +6,7 @@ type View struct {
 	Id      int32 `orm:"auto"`
 	Name    string
 	Servers []*Server `orm:"reverse(many)"`
+	Owner   *User     `orm:"rel(fk)"`
 }
 
 func init() {
