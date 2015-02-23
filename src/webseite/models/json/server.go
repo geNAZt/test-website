@@ -23,7 +23,6 @@ type Server struct {
 	Record     int32
 	Average    int32
 	Favicon    string
-	Ping       int32
 	Ping24     int32
 	Favicons   []status.Favicon `json:"-"`
 }
@@ -76,17 +75,29 @@ func ReloadServers(servers []models.Server) {
 	lock.Lock()
 	defer lock.Unlock()
 
+	_, offset := time.Now().Zone()
+	now := time.Now().Unix() - int64(offset)
+
 	for serverI := range servers {
 		sqlServer := servers[serverI]
 
 		pings := sqlServer.Pings
 
+		lastTime := int64(0)
+		var ping24 *models.Ping
+
 		for pingI := range pings {
 			ping := pings[pingI]
+
+			diff := now - ping.Time.Unix()
+			if diff > lastTime && diff < int64(24*time.Hour) {
+				lastTime = diff
+				ping24 = ping
+			}
+
 			AddPing(sqlServer.Id, ping.Time.Unix(), ping.Online)
 		}
 
-		var ping24 *models.Ping
 		if len(pings) > 0 {
 			ping24 = pings[0]
 		}
@@ -96,7 +107,11 @@ func ReloadServers(servers []models.Server) {
 			IP:      sqlServer.Ip,
 			Name:    sqlServer.Name,
 			Website: sqlServer.Website,
-			Online:  sqlServer.Pings[len(sqlServer.Pings)-1].Online,
+			Online:  0,
+		}
+
+		if len(sqlServer.Pings) > 1 {
+			jsonServer.Online = sqlServer.Pings[len(sqlServer.Pings)-1].Online
 		}
 
 		if ping24 != nil {
@@ -202,8 +217,6 @@ func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 		Favicons.Add(server.Name, storedFavicon)
 	}
 
-	server.Ping = int32(status.Ping)
-
 	AddPing(server.Id, time.Now().Unix()-int64(offset), online)
 
 	jsonPlayerUpdate := JSONUpdatePlayerResponse{
@@ -212,7 +225,6 @@ func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 			Id:      server.Id,
 			Online:  online,
 			Time:    time.Now().Unix() - int64(offset),
-			Ping:    server.Ping,
 			Average: server.Average,
 			Record:  server.Record,
 		},
