@@ -3,9 +3,9 @@ package mail
 import (
 	"bytes"
 	"fmt"
-	//	"github.com/astaxie/beego"
-	//	netMail "net/mail"
-	//	"net/smtp"
+	"github.com/astaxie/beego"
+	netMail "net/mail"
+	"net/smtp"
 	"os"
 	"regexp"
 	"text/template"
@@ -44,7 +44,7 @@ func SendTemplateMail(to string, templateName string, data map[string]string) *e
 	}
 
 	// Set up authentication information.
-	/*server := SMTPServer{
+	server := SMTPServer{
 		Addr: beego.AppConfig.String("MailAddr"),
 		Auth: smtp.PlainAuth(
 			"",
@@ -52,29 +52,24 @@ func SendTemplateMail(to string, templateName string, data map[string]string) *e
 			beego.AppConfig.String("MailPassword"),
 			beego.AppConfig.String("MailHost"),
 		),
-	}*/
+	}
 
 	// Split the template
 	tempOutput := newbytes.String()
-	fmt.Printf("tempOutput: %v", tempOutput)
-
 	split := regexp.MustCompile("\n").Split(tempOutput, 3)
-	fmt.Printf("split[0]: %v", split[0])
-	fmt.Printf("split[1]: %v", split[1])
-	fmt.Printf("split[2]: %v", split[2])
 
-	/*mail := Mail{
+	mail := Mail{
 		Server:  server,
 		From:    netMail.Address{beego.AppConfig.String("MailFrom"), beego.AppConfig.String("MailFromAddress")},
 		To:      netMail.Address{"", to},
-		Subject: "Register at minecrafttracker.net",
-		Message: "This is a test message to get the demo running",
+		Subject: split[0],
+		Message: split[2],
 	}
 
 	errMailSend := mail.Send()
 	if errMailSend != nil {
 		return &errMailSend
-	}*/
+	}
 
 	return nil
 }
