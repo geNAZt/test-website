@@ -2,7 +2,6 @@ package mail
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/astaxie/beego"
 	netMail "net/mail"
 	"net/smtp"
