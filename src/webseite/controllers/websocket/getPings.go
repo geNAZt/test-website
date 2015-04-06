@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"webseite/models/json"
 	"webseite/websocket"
+	"time"
+	"fmt"
 )
 
 func init() {
@@ -24,6 +26,8 @@ func listenGetPings() {
 }
 
 func sendPings(m websocket.Message) {
+	start := time.Now()
+
 	serverId := ParseServerId(m)
 	if serverId == -1 {
 		return
@@ -44,4 +48,7 @@ func sendPings(m websocket.Message) {
 
 		jsonResponse.Send(m.Connection)
 	}
+
+	elapsed := time.Since(start)
+	json.SendLog(m.Connection, "Sending Pings for Server " + fmt.Sprintf("%s", serverId) + " took " + fmt.Sprintf("%s", elapsed) )
 }
