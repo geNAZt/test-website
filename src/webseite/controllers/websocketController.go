@@ -7,6 +7,7 @@ import (
 	"webseite/models/json"
 	"webseite/websocket"
 	"time"
+	"fmt"
 )
 
 type WSController struct {
@@ -43,5 +44,5 @@ func (w *WSController) Get() {
 	json.SendAllServers(conn, view)
 
 	elapsed := time.Since(start)
-	json.SendLog(conn, "Sending the View with servers took " + elapsed )
+	json.SendLog(conn, "Sending the View with servers took " + fmt.Sprintf("%s", elapsed) )
 }
