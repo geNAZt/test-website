@@ -85,6 +85,9 @@ var wsFuncs = {
         if (favicons[data["Server"]] !== undefined) {
             favicons[data["Server"]].attr("src", data["Icon"]);
         }
+    },
+    log: function(data) {
+        console.log(data);
     }
 };
 

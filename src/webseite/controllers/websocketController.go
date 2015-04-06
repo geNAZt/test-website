@@ -6,6 +6,7 @@ import (
 	"webseite/models"
 	"webseite/models/json"
 	"webseite/websocket"
+	"time"
 )
 
 type WSController struct {
@@ -18,6 +19,8 @@ func (w *WSController) Get() {
 
 	conn := websocket.Upgrade(w.Controller)
 
+	start := time.Now()
+
 	// Get the default View
 	// ORM
 	o := orm.NewOrm()
@@ -26,7 +29,7 @@ func (w *WSController) Get() {
 	// Build up the Query
 	qb, _ := orm.NewQueryBuilder("mysql")
 	qb.Select("*").
-		From("view").
+		From("`view`").
 		Where("`id` = ?")
 
 	// Get the SQL Statement and execute it
@@ -38,4 +41,7 @@ func (w *WSController) Get() {
 
 	// Send this Client all known Servers
 	json.SendAllServers(conn, view)
+
+	elapsed := time.Since(start)
+	json.SendLog(conn, "Sending the View with servers took " + elapsed )
 }

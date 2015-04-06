@@ -129,6 +129,24 @@ func ReloadServers(servers []models.Server) {
 	}
 }
 
+func SendLog(c *websocket.Connection, message string) {
+	lock.RLock()
+	defer lock.RUnlock()
+
+	jsonResponse := JSONResponse{
+		Ident: "log",
+		Value: message,
+	}
+
+	jsonBytes, err := gojson.Marshal(jsonResponse)
+	if err != nil {
+		beego.BeeLogger.Warn("Could not convert to json: %v", err)
+		return
+	}
+
+	c.Send <- jsonBytes
+}
+
 func SendAllServers(c *websocket.Connection, view *models.View) {
 	lock.RLock()
 	defer lock.RUnlock()
