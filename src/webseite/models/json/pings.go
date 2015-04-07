@@ -70,7 +70,7 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 			sqlPing := pings[pingI]
 
 			if shouldSkip > 0 {
-				if skip > skip[sqlPing.ServerId] {
+				if shouldSkip > skip[sqlPing.ServerId] {
 					skip[sqlPing.ServerId]++
 					continue
 				}
