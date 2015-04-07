@@ -33,7 +33,7 @@ func sendPings(m websocket.Message) {
 		return
 	}
 
-	jsonServers := json.GetPingResponse(serverId, int32(2))
+	jsonServers := json.GetPingResponse(serverId, m.Connection.Session.Get("days").(int32))
 	for sId := range jsonServers {
 		jsonResponse := &json.JSONResponse{
 			Ident: "pings",
