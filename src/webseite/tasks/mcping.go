@@ -6,13 +6,16 @@ import (
 	"github.com/astaxie/beego/toolbox"
 	status "github.com/geNAZt/minecraft-status"
 	statusdata "github.com/geNAZt/minecraft-status/data"
-	"strconv"
 	"time"
 	"webseite/models"
 	"webseite/models/json"
+	"webseite/util"
+	"sync"
 )
 
 var servers []models.Server
+var queue *util.Queue
+var queueMutex = &sync.Mutex{}
 
 func InitTasks() {
 	// ORM
@@ -32,6 +35,9 @@ func InitTasks() {
 	// Reload the JSON side
 	json.ReloadServers(servers)
 
+	// Prepare the queue and let the pinger roll
+	queue = &util.Queue{nodes: make([]*models.Ping, 100)}
+
 	mcping := toolbox.NewTask("mcping", "0 * * * * *", func() error {
 		// Reload servers
 		servers = []models.Server{}
@@ -48,17 +54,35 @@ func InitTasks() {
 		return nil
 	})
 
+	batchInserter := toolbox.NewTask("batchInserter", "0 */5 * * * *", func() error {
+		queueMutex.Lock()
+		defer queueMutex.Unlock()
+
+		bulk := make([]*models.Ping, queue.Size())
+		count := 0
+		for {
+			ele := queue.Pop()
+			if ele == nil {
+				break
+			}
+
+			bulk[count] = ele
+			count++
+		}
+
+		o.InsertMulti(20, bulk)
+		queue = &util.Queue{nodes: make([]*models.Ping, 100)}
+		return nil
+	})
+
 	toolbox.AddTask("mcping", mcping)
+	toolbox.AddTask("batchInserter", batchInserter)
 
 	// Start the tasks
 	toolbox.StartTask()
 }
 
 func ping(server *models.Server) {
-	// Get the database
-	o := orm.NewOrm()
-	o.Using("default")
-
 	// Ask the JSON side if we have a animated Favicon
 	fetchFavicon := true
 	fetchAnimated := server.DownloadAnimatedFavicon
@@ -94,33 +118,10 @@ func ping(server *models.Server) {
 		Time:   time.Now(),
 	}
 
-	o.Insert(ping)
-
-	// Update record if needed
-	if int32(status.Players.Online) > server.Record {
-		server.Record = int32(status.Players.Online)
-		o.Update(server)
-	}
-
-	// Load the 24 hour before ping
-	// Build up the Query
-	qb, _ := orm.NewQueryBuilder("mysql")
-	qb.Select("*").
-		From("ping").
-		Where("server_id = " + strconv.FormatInt(int64(server.Id), 10)).
-		Limit(1).
-		Offset(24 * 60)
-
-	// Get the SQL Statement and execute it
-	sql := qb.String()
-	pings := []models.Ping{}
-	o.Raw(sql).QueryRows(&pings)
-
-	var ping24 models.Ping
-	if len(pings) > 0 {
-		ping24 = pings[0]
-	}
+	queueMutex.Lock()
+	queue.Push(ping)
+	queueMutex.Unlock()
 
 	// Notify the JSON side
-	json.UpdateStatus(server.Id, status, &ping24)
+	json.UpdateStatus(server.Id, status)
 }

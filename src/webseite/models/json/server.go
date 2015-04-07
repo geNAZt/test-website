@@ -210,7 +210,7 @@ func GetServer(id int32) Server {
 	}
 }
 
-func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
+func UpdateStatus(id int32, status *status.Status) {
 	_, offset := time.Now().Zone()
 
 	online := int32(status.Players.Online)
@@ -220,9 +220,6 @@ func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 	if !ok {
 		return
 	}
-
-	server.RecalcRecord()
-	server.RecalcAverage()
 
 	server.Online = online
 
@@ -259,8 +256,8 @@ func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 		server.MaxPlayers = max
 	}
 
-	if ping24 != nil {
-		jsonPlayerUpdate.Value.Ping24 = ping24.Online
+	if server.Ping24 != nil {
+		jsonPlayerUpdate.Value.Ping24 = server.Ping24
 	}
 
 	Servers[server.Id] = server
