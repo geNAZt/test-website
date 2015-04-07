@@ -21,12 +21,14 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 	// Prepare the map
 	sqlString := ""
 	returnMap := make(map[int32]*JSONPingResponse)
+	skip := make(map[int32]int)
 	for sId := range serverIds {
 		returnMap[serverIds[sId]] = &JSONPingResponse{
 			Id: serverIds[sId],
 			Players: make(map[string]int32),
 		}
 
+		skip[serverIds[sId]] = 0
 		sqlString += "`server_id` = '" + strconv.FormatInt(int64(serverIds[sId]),10) + "' OR "
 	}
 	sqlString = sqlString[:len(sqlString) - 4]
@@ -56,35 +58,27 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 	var pings []TempPingRow
 	_, err := o.Raw(sql, past24Hours).QueryRows(&pings)
 	if err == nil {
+		length := len(pings) / len(serverIds)
+		shouldSkip := 0
+
+		if length > 3000 {
+			shouldSkip = (length - 3000) / 3000
+		}
+
 		// Select the pings we need to fill in
 		for pingI := range pings {
 			sqlPing := pings[pingI]
-			returnMap[sqlPing.ServerId].Players[strconv.FormatInt(sqlPing.Time.Unix(), 10)] = sqlPing.Online
-		}
 
-		// Cap to a maximum of 300 data pointers
-		for sId := range serverIds {
-			length := len(returnMap[serverIds[sId]].Players)
-			skip := 0
-
-			// Calc which we should skip
-			if length > 3000 {
-				skip = (length - 3000) / 3000
-
-				// Remap if we need to
-				tempMap := make(map[string]int32)
-				counter := 0
-				for playerI := range returnMap[serverIds[sId]].Players {
-					if skip > counter {
-						counter++
-						continue
-					}
-
-					counter = 0
-					tempMap[playerI] = returnMap[serverIds[sId]].Players[playerI]
+			if shouldSkip > 0 {
+				if skip > skip[sqlPing.ServerId] {
+					skip[sqlPing.ServerId]++
+					continue
 				}
 
-				returnMap[serverIds[sId]].Players = tempMap
+				skip[sqlPing.ServerId] = 0
+				returnMap[sqlPing.ServerId].Players[strconv.FormatInt(sqlPing.Time.Unix(), 10)] = sqlPing.Online
+			} else {
+				returnMap[sqlPing.ServerId].Players[strconv.FormatInt(sqlPing.Time.Unix(), 10)] = sqlPing.Online
 			}
 		}
 	}
