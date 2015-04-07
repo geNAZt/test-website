@@ -54,8 +54,12 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 		// Select the pings we need to fill in
 		for pingI := range pings {
 			sqlPing := pings[pingI]
+
 			t, _ := time.Parse(createdFormat, sqlPing["time"].(string))
-			returnMap[int32(strconv.ParseInt(sqlPing["server_id"].(string), 10, 32))].Players[strconv.FormatInt(int64(t.Unix()), 10)] = int32(strconv.ParseInt(sqlPing["online"].(string), 10, 32))
+			sid, _ := strconv.ParseInt(sqlPing["server_id"].(string), 10, 32)
+			online, _ := strconv.ParseInt(sqlPing["online"].(string), 10, 32)
+
+			returnMap[int32(sid)].Players[strconv.FormatInt(int64(t.Unix()), 10)] = int32(online)
 		}
 
 		// Cap to a maximum of 300 data pointers
