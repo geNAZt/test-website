@@ -6,7 +6,7 @@ import (
 	"webseite/websocket"
 )
 
-func ParseServerId(m websocket.Message) int32 {
+func ParseInt(m websocket.Message) int32 {
 	message := string(m.Message)
 
 	if !strings.Contains(message, ":") {
@@ -20,4 +20,26 @@ func ParseServerId(m websocket.Message) int32 {
 	}
 
 	return int32(serverId)
+}
+
+func ParseInts(m websocket.Message) []int32 {
+	message := string(m.Message)
+
+	if !strings.Contains(message, ":") {
+		return []int32{-1}
+	}
+
+	splits := strings.Split(message, ":")
+	ints := make([]int32, len(splits) - 1)
+	counter := 0
+
+	for key := range splits {
+		serverId, errParse := strconv.ParseInt(splits[key], 10, 32)
+		if errParse != nil {
+			ints[counter] = serverId
+			counter++;
+		}
+	}
+
+	return ints
 }

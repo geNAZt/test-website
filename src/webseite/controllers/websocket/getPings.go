@@ -28,27 +28,24 @@ func listenGetPings() {
 func sendPings(m websocket.Message) {
 	start := time.Now()
 
-	serverId := ParseServerId(m)
-	if serverId == -1 {
+	serverId := ParseInts(m)
+	if serverId[0] == -1 {
 		return
 	}
 
-	server := json.GetServer(int32(serverId))
-	if server.Id != -1 {
-		jsonPings := &json.JSONPingResponse{
-			Id: server.Id,
+	jsonServers := json.GetPingResponse(serverId, int32(2))
+	for sId := range jsonServers {
+		server := json.GetServer(int32(jsonServers[sId].Id))
+		if server.Id != -1 {
+			jsonResponse := &json.JSONResponse{
+				Ident: "pings",
+				Value: jsonServers[sId].Players,
+			}
+
+			jsonResponse.Send(m.Connection)
 		}
-
-		jsonPings.FillPings(int32(2))
-
-		jsonResponse := &json.JSONResponse{
-			Ident: "pings",
-			Value: jsonPings,
-		}
-
-		jsonResponse.Send(m.Connection)
 	}
 
 	elapsed := time.Since(start)
-	json.SendLog(m.Connection, "Sending Pings for Server " + fmt.Sprintf("%s", serverId) + " took " + fmt.Sprintf("%s", elapsed) )
+	json.SendLog(m.Connection, "Sending Pings took " + fmt.Sprintf("%s", elapsed) )
 }

@@ -37,11 +37,14 @@ var wsFuncs = {
     servers: function (data) {
         servers = {};
 
+        var pingIds = "";
         data.forEach(function (value) {
             value["Color"] = getColor();
             servers[value["Id"]] = value;
-            conn.send("pings:" + value["Id"]);
+            pingIds += ":" + value["Id"];
         });
+
+        conn.send("pings" + pingIds);
 
         sortServers( true );
 

@@ -24,7 +24,7 @@ func listenRange() {
 }
 
 func sendRangePings(m websocket.Message) {
-	days := ParseServerId(m)
+	days := ParseInt(m)
 	if days == -1 {
 		return
 	}
