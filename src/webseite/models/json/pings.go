@@ -48,9 +48,9 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 
 	// Ask the Database for 24h Ping
 	sql := qb.String()
-	pings := []models.Ping{}
 
-	_, err := o.Raw(sql, past24Hours).QueryRows(&pings)
+	var pings []orm.Params
+	_, err := o.Raw(sql, past24Hours).Values(pings)
 	if err == nil {
 		// Select the pings we need to fill in
 		for pingI := range pings {
@@ -59,7 +59,7 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 			fmt.Printf("%v", sqlPing)
 			fmt.Printf("%v", returnMap)
 
-			returnMap[sqlPing.Id].Players[strconv.FormatInt(int64(sqlPing.Time.Unix()), 10)] = sqlPing.Online
+			//returnMap[sqlPing.Id].Players[strconv.FormatInt(int64(sqlPing.Time.Unix()), 10)] = sqlPing.Online
 		}
 
 		// Cap to a maximum of 300 data pointers
