@@ -330,11 +330,12 @@ function connectToWebSocket(host) {
 function sendPingIDs() {
     var pingIds = "";
 
-    servers.forEach(function (value) {
-        if ( graphSettings.indexOf(value["Name"]) == -1 ) {
-            pingIds += ":" + value["Id"];
+    serversCopy = servers;
+    for (var key in serversCopy) {
+        if (serversCopy.hasOwnProperty(key) && graphSettings.indexOf(serversCopy[key]["Name"]) == -1) {
+            pingIds += ":" + serversCopy[key]["Id"];
         }
-    });
+    }
 
     if ( pingIds != "" ) {
         conn.send("pings" + pingIds);
