@@ -6,7 +6,6 @@ import (
 	"github.com/astaxie/beego/orm"
 	status "github.com/geNAZt/minecraft-status/data"
 	"strconv"
-	"sync"
 	"time"
 	"webseite/cache"
 	"webseite/models"
