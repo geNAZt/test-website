@@ -36,7 +36,7 @@ func InitTasks() {
 	json.ReloadServers(servers)
 
 	// Prepare the queue and let the pinger roll
-	queue = &util.Queue{nodes: make([]*models.Ping, 100)}
+	queue = &util.Queue{Nodes: make([]*models.Ping, 100)}
 
 	mcping := toolbox.NewTask("mcping", "0 * * * * *", func() error {
 		// Reload servers
@@ -71,7 +71,7 @@ func InitTasks() {
 		}
 
 		o.InsertMulti(20, bulk)
-		queue = &util.Queue{nodes: make([]*models.Ping, 100)}
+		queue = &util.Queue{Nodes: make([]*models.Ping, 100)}
 		return nil
 	})
 
