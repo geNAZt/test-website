@@ -38,6 +38,8 @@ func (j *JSONPingResponse) FillPings(days int32) {
 	sql := qb.String()
 	pings := []models.Ping{}
 
+	fmt.Printf("Query: %s, Arguments: %v, %v", sql, j.Id, past24Hours)
+
 	_, err := o.Raw(sql, strconv.FormatInt(int64(j.Id), 10), past24Hours).QueryRows(&pings)
 	if err == nil {
 		// Select the pings we need to fill in
