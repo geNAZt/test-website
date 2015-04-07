@@ -37,15 +37,12 @@ var wsFuncs = {
     servers: function (data) {
         servers = {};
 
-        var pingIds = "";
         data.forEach(function (value) {
             value["Color"] = getColor();
             servers[value["Id"]] = value;
-            pingIds += ":" + value["Id"];
         });
 
-        conn.send("pings" + pingIds);
-
+        sendPingIDs();
         sortServers( true );
 
         $('#page-selection').bootpag({
@@ -330,6 +327,20 @@ function connectToWebSocket(host) {
     }
 }
 
+function sendPingIDs() {
+    var pingIds = "";
+
+    servers.forEach(function (value) {
+        if ( graphSettings.indexOf(value["Name"]) == -1 ) {
+            pingIds += ":" + value["Id"];
+        }
+    });
+
+    if ( pingIds != "" ) {
+        conn.send("pings" + pingIds);
+    }
+}
+
 $(document).ready(function () {
     $("#chartContainer").CanvasJSChart(options);
 
@@ -348,6 +359,7 @@ $(document).ready(function () {
             if ( sendTimeout == -1 ) {
                 sendTimeout = window.setTimeout(function() {
                     conn.send("range:" + time / (24*60));
+                    sendPingIDs();
                     sendTimeout = -1;
                 }, 3000)
             }

@@ -29,21 +29,5 @@ func sendRangePings(m websocket.Message) {
 		return
 	}
 
-	servers := json.Servers
-	for serverI := range servers {
-		jsonServer := servers[serverI]
-
-		jsonPings := &json.JSONPingResponse{
-			Id: jsonServer.Id,
-		}
-
-		jsonPings.FillPings(days)
-
-		jsonResponse := &json.JSONResponse{
-			Ident: "pings",
-			Value: jsonPings,
-		}
-
-		jsonResponse.Send(m.Connection)
-	}
+	m.Connection.Session.Set("days", int(days))
 }
