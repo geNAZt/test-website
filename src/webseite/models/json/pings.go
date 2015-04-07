@@ -12,12 +12,12 @@ type JSONPingResponse struct {
 	Players map[string]int32
 }
 
-func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse {
+func GetPingResponse(serverIds []int32, days int32) map[int32]JSONPingResponse {
 	// Prepare the map
 	sqlString := ""
-	returnMap := make(map[int32]*JSONPingResponse)
+	returnMap := make(map[int32]JSONPingResponse)
 	for sId := range serverIds {
-		returnMap[serverIds[sId]] = &JSONPingResponse{
+		returnMap[serverIds[sId]] = JSONPingResponse{
 			Id: serverIds[sId],
 			Players: make(map[string]int32),
 		}
