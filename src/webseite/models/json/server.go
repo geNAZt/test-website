@@ -121,7 +121,7 @@ func ReloadServers(servers []models.Server) {
 		ping := models.Ping{}
 
 		err := o.Raw(sql, strconv.FormatInt(int64(jsonServer.Id), 10), past24Hours, past24HoursAnd2Minutes).QueryRow(&ping)
-		if err != nil {
+		if err == nil {
 			jsonServer.Ping24 = ping.Online
 		}
 
