@@ -5,7 +5,6 @@ import (
 	"time"
 	"github.com/astaxie/beego/orm"
 	"webseite/models"
-	"fmt"
 )
 
 type JSONPingResponse struct {
@@ -49,8 +48,6 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 	// Ask the Database for 24h Ping
 	sql := qb.String()
 	pings := []models.Ping{}
-
-	fmt.Println(sql)
 
 	_, err := o.Raw(sql, past24Hours).QueryRows(&pings)
 	if err == nil {
