@@ -39,7 +39,10 @@ func sendPings(m websocket.Message) {
 		if server.Id != -1 {
 			jsonResponse := &json.JSONResponse{
 				Ident: "pings",
-				Value: jsonServers[sId].Players,
+				Value: &json.JSONPingResponse{
+					Id: sId,
+					Players: jsonServers[sId].Players,
+				},
 			}
 
 			jsonResponse.Send(m.Connection)
