@@ -60,7 +60,6 @@ type StoredFavicon struct {
 }
 
 var Servers map[int32]Server
-var lock sync.RWMutex
 var Favicons *cache.TimeoutCache
 
 func init() {
@@ -74,9 +73,6 @@ func init() {
 }
 
 func ReloadServers(servers []models.Server) {
-	lock.Lock()
-	defer lock.Unlock()
-
 	// Prepare ORM (database)
 	o := orm.NewOrm()
 	o.Using("default")
@@ -139,8 +135,9 @@ func ReloadServers(servers []models.Server) {
 }
 
 func SendLog(c *websocket.Connection, message string) {
-	lock.RLock()
-	defer lock.RUnlock()
+	defer func() {
+		recover()
+	}()
 
 	jsonResponse := JSONResponse{
 		Ident: "log",
@@ -157,8 +154,9 @@ func SendLog(c *websocket.Connection, message string) {
 }
 
 func SendAllServers(c *websocket.Connection, view *models.View) {
-	lock.RLock()
-	defer lock.RUnlock()
+	defer func() {
+		recover()
+	}()
 
 	jsonResponse := JSONResponse{
 		Ident: "servers",
@@ -214,9 +212,6 @@ func GetServer(id int32) Server {
 }
 
 func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
-	lock.RLock()
-	defer lock.RUnlock()
-
 	_, offset := time.Now().Zone()
 
 	online := int32(status.Players.Online)
