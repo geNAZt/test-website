@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"strings"
 	"webseite/websocket"
+	"fmt"
 )
 
 func ParseInt(m websocket.Message) int32 {
@@ -34,6 +35,8 @@ func ParseInts(m websocket.Message) []int32 {
 	counter := 0
 
 	for key := range splits {
+		fmt.Printf("%v", key)
+
 		serverId, errParse := strconv.ParseInt(splits[key], 10, 32)
 		if errParse != nil {
 			ints[counter] = int32(serverId)
