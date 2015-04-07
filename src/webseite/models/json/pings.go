@@ -5,6 +5,7 @@ import (
 	"time"
 	"github.com/astaxie/beego/orm"
 	"webseite/models"
+	"fmt"
 )
 
 type JSONPingResponse struct {
@@ -68,5 +69,7 @@ func (j *JSONPingResponse) FillPings(days int32) {
 
 			j.Players = tempMap
 		}
+	} else {
+		fmt.Printf("%v", err)
 	}
 }
