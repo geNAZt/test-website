@@ -83,6 +83,8 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 			}
 		}
 	}
+
+	return returnMap
 }
 
 func (j *JSONPingResponse) FillPings(days int32) {
