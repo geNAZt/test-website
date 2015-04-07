@@ -11,8 +11,6 @@ import (
 	"webseite/models/json"
 	"webseite/util"
 	"sync"
-	"webseite/util"
-	"webseite/util"
 )
 
 var servers []models.Server
