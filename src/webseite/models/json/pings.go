@@ -42,7 +42,7 @@ func (j *JSONPingResponse) FillPings(days int32) {
 		// Select the pings we need to fill in
 		for pingI := range pings {
 			sqlPing := pings[pingI]
-			j.Players[strconv.FormatInt(pingI, 10)] = sqlPing
+			j.Players[strconv.FormatInt(int64(pingI), 10)] = sqlPing.Online
 		}
 
 		// Cap to a maximum of 300 data pointers
