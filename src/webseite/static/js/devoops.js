@@ -346,7 +346,7 @@ $(document).ready(function () {
                 sendTimeout = window.setTimeout(function() {
                     conn.send("range:" + time / (24*60));
                     sendTimeout = -1;
-                }, 1000)
+                }, 3000)
             }
         }
     });
