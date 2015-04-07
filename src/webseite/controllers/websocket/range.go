@@ -2,7 +2,6 @@ package websocket
 
 import (
 	"bytes"
-	"webseite/models/json"
 	"webseite/websocket"
 )
 
