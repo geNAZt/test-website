@@ -25,7 +25,7 @@ func listenAnimatedFavicon() {
 }
 
 func displayAnimatedFavicon(m websocket.Message) {
-	serverId := ParseServerId(m)
+	serverId := ParseInt(m)
 	if serverId == -1 {
 		return
 	}

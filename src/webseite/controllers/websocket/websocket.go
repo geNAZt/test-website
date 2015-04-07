@@ -36,7 +36,7 @@ func ParseInts(m websocket.Message) []int32 {
 	for key := range splits {
 		serverId, errParse := strconv.ParseInt(splits[key], 10, 32)
 		if errParse != nil {
-			ints[counter] = serverId
+			ints[counter] = int32(serverId)
 			counter++;
 		}
 	}
