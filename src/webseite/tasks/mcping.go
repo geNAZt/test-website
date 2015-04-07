@@ -39,13 +39,6 @@ func InitTasks() {
 	queue = &util.Queue{Nodes: make([]*models.Ping, 100)}
 
 	mcping := toolbox.NewTask("mcping", "0 * * * * *", func() error {
-		// Reload servers
-		servers = []models.Server{}
-		o.Raw(sql).QueryRows(&servers)
-
-		// Reload the JSON side
-		json.ReloadServers(servers)
-
 		// Ping all da servers
 		for serverId := range servers {
 			go ping(&servers[serverId])
@@ -54,10 +47,11 @@ func InitTasks() {
 		return nil
 	})
 
-	batchInserter := toolbox.NewTask("batchInserter", "0 */5 * * * *", func() error {
+	batchInserter := toolbox.NewTask("batchInserter", "0 * * * * *", func() error {
 		queueMutex.Lock()
 		defer queueMutex.Unlock()
 
+		// Remap into bulk array
 		bulk := make([]*models.Ping, queue.Size())
 		count := 0
 		for {
@@ -70,8 +64,17 @@ func InitTasks() {
 			count++
 		}
 
+		// Insert with max 20 in a Query
 		o.InsertMulti(20, bulk)
 		queue = &util.Queue{Nodes: make([]*models.Ping, 100)}
+
+		// Reload servers
+		servers = []models.Server{}
+		o.Raw(sql).QueryRows(&servers)
+
+		// Reload the JSON side
+		json.ReloadServers(servers)
+
 		return nil
 	})
 
