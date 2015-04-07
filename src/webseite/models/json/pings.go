@@ -5,6 +5,7 @@ import (
 	"time"
 	"github.com/astaxie/beego/orm"
 	"webseite/models"
+	"fmt"
 )
 
 type JSONPingResponse struct {
@@ -12,12 +13,12 @@ type JSONPingResponse struct {
 	Players map[string]int32
 }
 
-func GetPingResponse(serverIds []int32, days int32) map[int32]JSONPingResponse {
+func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse {
 	// Prepare the map
 	sqlString := ""
-	returnMap := make(map[int32]JSONPingResponse)
+	returnMap := make(map[int32]*JSONPingResponse)
 	for sId := range serverIds {
-		returnMap[serverIds[sId]] = JSONPingResponse{
+		returnMap[serverIds[sId]] = &JSONPingResponse{
 			Id: serverIds[sId],
 			Players: make(map[string]int32),
 		}
@@ -54,6 +55,10 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]JSONPingResponse {
 		// Select the pings we need to fill in
 		for pingI := range pings {
 			sqlPing := pings[pingI]
+
+			fmt.Printf("%v", sqlPing)
+			fmt.Printf("%v", returnMap)
+
 			returnMap[sqlPing.Id].Players[strconv.FormatInt(int64(sqlPing.Time.Unix()), 10)] = sqlPing.Online
 		}
 
