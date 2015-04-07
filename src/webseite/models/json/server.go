@@ -256,10 +256,7 @@ func UpdateStatus(id int32, status *status.Status) {
 		server.MaxPlayers = max
 	}
 
-	if server.Ping24 != nil {
-		jsonPlayerUpdate.Value.Ping24 = server.Ping24
-	}
-
+	jsonPlayerUpdate.Value.Ping24 = server.Ping24
 	Servers[server.Id] = server
 
 	jsonBytes, err := gojson.Marshal(jsonPlayerUpdate)

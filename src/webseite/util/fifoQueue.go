@@ -1,9 +1,5 @@
 package util
 
-import (
-    "fmt"
-)
-
 type Node struct {
     Value int
 }
