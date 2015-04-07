@@ -337,7 +337,7 @@ $(document).ready(function () {
         range: "min",
         value: 2,
         min: 2,
-        max: 60,
+        max: 365,
         slide: function( event, ui ) {
             time = ui.value * 24 * 60;
             options.title.text = "Last " + ui.value + " Days";
