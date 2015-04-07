@@ -12,6 +12,12 @@ type JSONPingResponse struct {
 	Players map[string]int32
 }
 
+type TempPingRow struct {
+	Time time.Time
+	ServerId int32
+	Online int32
+}
+
 func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse {
 	// Prepare the map
 	sqlString := ""
@@ -38,7 +44,7 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 
 	// Build up the Query
 	qb, _ := orm.NewQueryBuilder("mysql")
-	qb.Select("*").
+	qb.Select("`time`, `server_id`, `online`").
 		From("`ping`").
 		Where("(" + sqlString + ")").
 		And("`time` > ?").
@@ -48,18 +54,13 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 	// Ask the Database for 24h Ping
 	sql := qb.String()
 
-	var pings []orm.Params
-	_, err := o.Raw(sql, past24Hours).Values(&pings)
+	var pings []TempPingRow
+	_, err := o.Raw(sql, past24Hours).QueryRows(&pings)
 	if err == nil {
 		// Select the pings we need to fill in
 		for pingI := range pings {
 			sqlPing := pings[pingI]
-
-			t, _ := time.Parse(createdFormat, sqlPing["time"].(string))
-			sid, _ := strconv.ParseInt(sqlPing["server_id"].(string), 10, 32)
-			online, _ := strconv.ParseInt(sqlPing["online"].(string), 10, 32)
-
-			returnMap[int32(sid)].Players[strconv.FormatInt(int64(t.Unix()), 10)] = int32(online)
+			returnMap[sqlPing.ServerId].Players[strconv.FormatInt(sqlPing.Time.Unix(), 10)] = sqlPing.Online
 		}
 
 		// Cap to a maximum of 300 data pointers
