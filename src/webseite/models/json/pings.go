@@ -50,7 +50,7 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 	sql := qb.String()
 
 	var pings []orm.Params
-	_, err := o.Raw(sql, past24Hours).Values(pings)
+	_, err := o.Raw(sql, past24Hours).Values(&pings)
 	if err == nil {
 		// Select the pings we need to fill in
 		for pingI := range pings {
