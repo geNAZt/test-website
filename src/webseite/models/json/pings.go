@@ -22,7 +22,7 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 			Players: make(map[string]int32),
 		}
 
-		sqlString += "`server_id` = '" + serverIds[sId] + "' OR "
+		sqlString += "`server_id` = '" + strconv.FormatInt(int64(serverIds[sId]),10) + "' OR "
 	}
 	sqlString = sqlString[:len(sqlString) - 4]
 
