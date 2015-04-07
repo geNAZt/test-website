@@ -8,7 +8,7 @@ import (
 
 type JSONPingResponse struct {
 	Id      int32
-	Players map[int64]int32
+	Players map[string]int32
 }
 
 type TempPingRow struct {
@@ -24,7 +24,7 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 	for sId := range serverIds {
 		returnMap[serverIds[sId]] = &JSONPingResponse{
 			Id: serverIds[sId],
-			Players: make(map[int64]int32),
+			Players: make(map[string]int32),
 		}
 
 		sqlString += "`server_id` = '" + strconv.FormatInt(int64(serverIds[sId]),10) + "' OR "
@@ -59,7 +59,7 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 		// Select the pings we need to fill in
 		for pingI := range pings {
 			sqlPing := pings[pingI]
-			returnMap[sqlPing.ServerId].Players[int64(sqlPing.Time.Unix())] = sqlPing.Online
+			returnMap[sqlPing.ServerId].Players[strconv.FormatInt(sqlPing.Time.Unix(), 10)] = sqlPing.Online
 		}
 
 		// Cap to a maximum of 300 data pointers
@@ -72,7 +72,7 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 				skip = (length - 3000) / 3000
 
 				// Remap if we need to
-				tempMap := make(map[int64]int32)
+				tempMap := make(map[string]int32)
 				counter := 0
 				for playerI := range returnMap[serverIds[sId]].Players {
 					if skip > counter {
