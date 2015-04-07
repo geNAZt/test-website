@@ -1,19 +1,15 @@
 package util
 
-type Node struct {
-    Value int
-}
-
 // Stack is a basic LIFO stack that resizes as needed.
 type Stack struct {
-    nodes    []*Node
+    nodes    []*interface{}
     count    int
 }
 
 // Push adds a node to the stack.
-func (s *Stack) Push(n *Node) {
+func (s *Stack) Push(n *interface{}) {
     if s.count >= len(s.nodes) {
-        nodes := make([]*Node, len(s.nodes)*2)
+        nodes := make([]*interface{}, len(s.nodes)*2)
         copy(nodes, s.nodes)
         s.nodes = nodes
     }
@@ -23,7 +19,7 @@ func (s *Stack) Push(n *Node) {
 }
 
 // Pop removes and returns a node from the stack in last to first order.
-func (s *Stack) Pop() *Node {
+func (s *Stack) Pop() *interface{} {
     if s.count == 0 {
         return nil
     }
@@ -35,16 +31,16 @@ func (s *Stack) Pop() *Node {
 
 // Queue is a basic FIFO queue based on a circular list that resizes as needed.
 type Queue struct {
-    nodes    []*Node
+    nodes    []*interface{}
     head    int
     tail    int
     count    int
 }
 
 // Push adds a node to the queue.
-func (q *Queue) Push(n *Node) {
+func (q *Queue) Push(n *interface{}) {
     if q.head == q.tail && q.count > 0 {
-        nodes := make([]*Node, len(q.nodes)*2)
+        nodes := make([]*interface{}, len(q.nodes)*2)
         copy(nodes, q.nodes[q.head:])
         copy(nodes[len(q.nodes)-q.head:], q.nodes[:q.head])
         q.head = 0
@@ -62,7 +58,7 @@ func (q *Queue) Size() int {
 }
 
 // Pop removes and returns a node from the queue in first to last order.
-func (q *Queue) Pop() *Node {
+func (q *Queue) Pop() *interface{} {
     if q.count == 0 {
         return nil
     }
