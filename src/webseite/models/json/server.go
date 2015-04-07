@@ -263,6 +263,8 @@ func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 		jsonPlayerUpdate.Value.Ping24 = ping24.Online
 	}
 
+	Servers[server.Id] = server
+
 	jsonBytes, err := gojson.Marshal(jsonPlayerUpdate)
 	if err != nil {
 		beego.BeeLogger.Warn("Could not convert to json: %v", err)
