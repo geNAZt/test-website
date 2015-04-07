@@ -16,6 +16,7 @@ import (
 var servers []models.Server
 var queue *util.Queue
 var queueMutex = &sync.Mutex{}
+var serverMutex = &sync.Mutex{}
 
 func InitTasks() {
 	// ORM
@@ -40,9 +41,11 @@ func InitTasks() {
 
 	mcping := toolbox.NewTask("mcping", "0 * * * * *", func() error {
 		// Ping all da servers
+		serverMutex.Lock();
 		for serverId := range servers {
 			go ping(&servers[serverId])
 		}
+		serverMutex.Unlock();
 
 		return nil
 	})
@@ -69,8 +72,10 @@ func InitTasks() {
 		queue = &util.Queue{Nodes: make([]*models.Ping, 100)}
 
 		// Reload servers
+		serverMutex.Lock()
 		servers = []models.Server{}
 		o.Raw(sql).QueryRows(&servers)
+		serverMutex.Unlock()
 
 		// Reload the JSON side
 		json.ReloadServers(servers)
