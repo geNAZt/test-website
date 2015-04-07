@@ -8,6 +8,8 @@ import (
 	"fmt"
 )
 
+const createdFormat = "2006-01-02 15:04:05"
+
 type JSONPingResponse struct {
 	Id      int32
 	Players map[string]int32
@@ -55,11 +57,8 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 		// Select the pings we need to fill in
 		for pingI := range pings {
 			sqlPing := pings[pingI]
-
-			fmt.Printf("%v", sqlPing)
-			fmt.Printf("%v", returnMap)
-
-			//returnMap[sqlPing.Id].Players[strconv.FormatInt(int64(sqlPing.Time.Unix()), 10)] = sqlPing.Online
+			t, _ := time.Parse(createdFormat, sqlPing["time"])
+			returnMap[sqlPing["server_id"]].Players[strconv.FormatInt(int64(t.Unix()), 10)] = int32(sqlPing["online"])
 		}
 
 		// Cap to a maximum of 300 data pointers
