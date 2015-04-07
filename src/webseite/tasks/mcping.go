@@ -22,17 +22,12 @@ func InitTasks() {
 	// Build up the Query
 	qb, _ := orm.NewQueryBuilder("mysql")
 	qb.Select("*").
-		From("server")
+		From("`server`")
 
 	// Get the SQL Statement and execute it
 	sql := qb.String()
 	servers = []models.Server{}
 	o.Raw(sql).QueryRows(&servers)
-
-	// Load
-	for serverI := range servers {
-		o.LoadRelated(&servers[serverI], "Pings", 0, 6*31*24*60, 0, "-Time")
-	}
 
 	// Reload the JSON side
 	json.ReloadServers(servers)
@@ -41,11 +36,6 @@ func InitTasks() {
 		// Reload servers
 		servers = []models.Server{}
 		o.Raw(sql).QueryRows(&servers)
-
-		// Load
-		for serverI := range servers {
-			o.LoadRelated(&servers[serverI], "Pings", 0, 6*31*24*60, 0, "-Time")
-		}
 
 		// Reload the JSON side
 		json.ReloadServers(servers)

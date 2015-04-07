@@ -13,6 +13,8 @@ import (
 	"webseite/websocket"
 )
 
+const createdFormat = "2006-01-02 15:04:05"
+
 type Server struct {
 	Id         int32
 	Name       string
@@ -75,54 +77,61 @@ func ReloadServers(servers []models.Server) {
 	lock.Lock()
 	defer lock.Unlock()
 
-	_, offset := time.Now().Zone()
-	now := time.Now().Unix() - int64(offset)
+	// Prepare ORM (database)
+	o := orm.NewOrm()
+	o.Using("default")
 
+	// Get the current time
+	_, offset := time.Now().Zone()
+
+	// Iterate over all Servers to calc 24h Pings
 	for serverI := range servers {
 		sqlServer := servers[serverI]
 
-		pings := sqlServer.Pings
-
-		lastTime := int64(0)
-		var ping24 *models.Ping
-
-		for pingI := range pings {
-			ping := pings[pingI]
-
-			diff := now - ping.Time.Unix()
-			if diff > lastTime && diff < int64(24*time.Hour) {
-				lastTime = diff
-				ping24 = ping
-			}
-
-			AddPing(sqlServer.Id, ping.Time.Unix(), ping.Online)
-		}
-
-		if len(pings) > 0 {
-			ping24 = pings[0]
-		}
-
+		// Check if there is a old entry
 		jsonServer := Server{
-			Id:      sqlServer.Id,
-			IP:      sqlServer.Ip,
-			Name:    sqlServer.Name,
-			Website: sqlServer.Website,
-			Online:  0,
+			Online: 0,
+		}
+		if tempJsonServer, ok := Servers[sqlServer.Id]; ok {
+			jsonServer = tempJsonServer
 		}
 
-		if len(sqlServer.Pings) > 1 {
-			jsonServer.Online = sqlServer.Pings[len(sqlServer.Pings)-1].Online
+		// Update basic informations
+		jsonServer.Id = sqlServer.Id
+		jsonServer.IP = sqlServer.Ip
+		jsonServer.Name = sqlServer.Name
+		jsonServer.Website = sqlServer.Website
+
+		// Check for 24h Ping
+		past24Hours := time.Unix( (time.Now().Add(time.Duration(-24*60) * time.Minute).Unix()) - int64(offset), 0 ).Format( createdFormat )
+		past24HoursAnd2Minutes := time.Unix( (time.Now().Add(time.Duration((-24*60)+2) * time.Minute).Unix()) - int64(offset), 0 ).Format( createdFormat )
+
+		// Build up the Query
+		qb, _ := orm.NewQueryBuilder("mysql")
+		qb.Select("*").
+			From("`ping`").
+			Where("`server_id` = ?").
+			And("`time` > ?").And("`time` < ?").
+			OrderBy("`time`").
+			Desc().
+			Limit(1)
+
+		// Ask the Database for 24h Ping
+		sql := qb.String()
+		ping := models.Ping{}
+
+		err := o.Raw(sql, strconv.FormatInt(int64(jsonServer.Id), 10), past24Hours, past24HoursAnd2Minutes).QueryRow(&ping)
+		if err != nil {
+			jsonServer.Ping24 = ping.Online
 		}
 
-		if ping24 != nil {
-			jsonServer.Ping24 = ping24.Online
-		}
-
+		// Get the Favicons for this Server entities
 		if ent, ok := Favicons.Get(jsonServer.Name); ok {
 			jsonServer.Favicons = ent.(StoredFavicon).Favicons
 			jsonServer.Favicon = ent.(StoredFavicon).Favicon
 		}
 
+		// Recalc Average and record counters
 		jsonServer.RecalcAverage()
 		jsonServer.RecalcRecord()
 		Servers[jsonServer.Id] = jsonServer
@@ -234,8 +243,6 @@ func UpdateStatus(id int32, status *status.Status, ping24 *models.Ping) {
 
 		Favicons.Add(server.Name, storedFavicon)
 	}
-
-	AddPing(server.Id, time.Now().Unix()-int64(offset), online)
 
 	jsonPlayerUpdate := JSONUpdatePlayerResponse{
 		Ident: "updatePlayer",
