@@ -34,7 +34,7 @@ func sendPings(m websocket.Message) {
 	}
 
 	jsonServers := json.GetPingResponse(serverId, int32(m.Connection.Session.Get("days").(int)))
-	sendResponse := make([]*json.JSONPingResponse)
+	sendResponse := make([]*json.JSONPingResponse, 1)
 
 	for sId := range jsonServers {
 		sendResponse = append(sendResponse, &json.JSONPingResponse{
