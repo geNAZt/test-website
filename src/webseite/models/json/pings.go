@@ -19,9 +19,37 @@ type TempPingRow struct {
 }
 
 var timestampCache *cache.TimeoutCache
+var parseCache *cache.TimeoutCache
+var datetimeCache *cache.TimeoutCache
 
 func init() {
-	timestampCache, _ = cache.NewTimeoutCache(int64(24) * int64(time.Hour))
+	timestampCache, _ = cache.NewTimeoutCache(int64(24 * 31) * int64(time.Hour))
+	parseCache, _ = cache.NewTimeoutCache(int64(24 * 31) * int64(time.Hour))
+	datetimeCache, _ = cache.NewTimeoutCache(int64(24 * 31) * int64(time.Hour))
+}
+
+func getParsedTime(representation string) time.Time {
+	// Check cache
+	if val, ok := datetimeCache.Get(representation); ok {
+		return val.(time.Time)
+	}
+
+	// Calc new time
+	str, _ := time.ParseInLocation(createdFormat, representation, time.Local)
+	datetimeCache.Add(representation, str)
+	return str
+}
+
+func getParsedInt(representation string) int32 {
+	// Check cache
+	if val, ok := parseCache.Get(representation); ok {
+		return val.(int64)
+	}
+
+	// Calc new integer
+	str, _ := strconv.ParseInt(representation, 10, 32);
+	parseCache.Add(representation, str)
+	return int32(str)
 }
 
 func getStringRepresentation(unix int64) string {
@@ -88,9 +116,9 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 		for pingI := range pings {
 			sqlPing := pings[pingI]
 
-			serverId, _ := strconv.ParseInt(sqlPing["server_id"].(string), 10, 32);
-			time, _ := time.ParseInLocation(createdFormat, sqlPing["time"].(string), time.Local)
-			online, _ := strconv.ParseInt(sqlPing["online"].(string), 10, 32);
+			serverId, _ := getParsedInt(sqlPing["server_id"].(string))
+			time, _ := getParsedTime(sqlPing["time"].(string))
+			online, _ := getParsedInt(sqlPing["online"].(string))
 
 			if shouldSkip > 0 {
 				if shouldSkip > skip[int32(serverId)] {
