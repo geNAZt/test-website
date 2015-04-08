@@ -12,67 +12,33 @@ type JSONPingResponse struct {
 	Players map[string]int32
 }
 
-type TempPingRow struct {
-	Time time.Time
-	ServerId int32
-	Online int32
-}
-
-var timestampCache *cache.TimeoutCache
-var parseCache *cache.TimeoutCache
-var datetimeCache *cache.TimeoutCache
-
-func init() {
-	timestampCache, _ = cache.NewTimeoutCache(int64(24 * 31) * int64(time.Hour))
-	parseCache, _ = cache.NewTimeoutCache(int64(24 * 31) * int64(time.Hour))
-	datetimeCache, _ = cache.NewTimeoutCache(int64(24 * 31) * int64(time.Hour))
-}
-
 func getParsedTime(representation string) time.Time {
-	// Check cache
-	if val, ok := datetimeCache.Get(representation); ok {
-		return val.(time.Time)
-	}
-
 	// Calc new time
 	str, _ := time.ParseInLocation(createdFormat, representation, time.Local)
-	datetimeCache.Add(representation, str)
 	return str
 }
 
 func getParsedInt(representation string) int32 {
-	// Check cache
-	if val, ok := parseCache.Get(representation); ok {
-		return val.(int32)
-	}
-
 	// Calc new integer
 	str, _ := strconv.ParseInt(representation, 10, 32);
-	parseCache.Add(representation, int32(str))
 	return int32(str)
 }
 
 func getStringRepresentation(unix int64) string {
-	// Check cache
-	if val, ok := timestampCache.Get(unix); ok {
-		return val.(string)
-	}
-
 	// Calc new string
 	str := strconv.FormatInt(unix, 10);
-	timestampCache.Add(unix, str)
 	return str
 }
 
 func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse {
 	// Prepare the map
 	sqlIds := make([]string, len(serverIds))
-	returnMap := make(map[int32]*JSONPingResponse)
-	skip := make(map[int32]int)
+	returnMap := make(map[int32]*JSONPingResponse, len(serverIds))
+	skip := make(map[int32]int, len(serverIds))
 	for sId := range serverIds {
 		returnMap[serverIds[sId]] = &JSONPingResponse{
 			Id: serverIds[sId],
-			Players: make(map[string]int32),
+			Players: make(map[string]int32, 6000),
 		}
 
 		skip[serverIds[sId]] = 0
