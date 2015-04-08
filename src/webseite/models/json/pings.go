@@ -4,7 +4,6 @@ import (
 	"strconv"
 	"time"
 	"github.com/astaxie/beego/orm"
-	"webseite/cache"
 )
 
 type JSONPingResponse struct {
