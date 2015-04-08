@@ -27,7 +27,7 @@ func init() {
 func getStringRepresentation(unix int64) string {
 	// Check cache
 	if val, ok := timestampCache.Get(unix); ok {
-		return val
+		return val.(string)
 	}
 
 	// Calc new string
