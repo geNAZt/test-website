@@ -23,7 +23,7 @@ func init() {
 	timestampCache = make(map[int64]string)
 }
 
-func getStringRepresentation(unix int64) {
+func getStringRepresentation(unix int64) string {
 	// Check cache
 	if val, ok := timestampCache[unix]; ok {
 		return val
