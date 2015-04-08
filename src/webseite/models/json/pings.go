@@ -18,7 +18,7 @@ type TempPingRow struct {
 	Online int32
 }
 
-var timestampCache cache.TimeoutCache
+var timestampCache *cache.TimeoutCache
 
 func init() {
 	timestampCache, _ = cache.NewTimeoutCache(int64(24) * int64(time.Hour))
