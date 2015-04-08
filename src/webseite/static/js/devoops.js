@@ -367,7 +367,7 @@ $(document).ready(function () {
                     sendPingIDs();
                     sendTimeout = -1;
                     $("#slider").slider("option", "disabled", true);
-                }, 3000)
+                }, 1000)
             }
         }
     });
