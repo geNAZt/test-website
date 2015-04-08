@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"time"
 	"github.com/astaxie/beego/orm"
+	"webseite/cache"
 )
 
 type JSONPingResponse struct {
@@ -17,21 +18,21 @@ type TempPingRow struct {
 	Online int32
 }
 
-var timestampCache map[int64]string
+var timestampCache cache.TimeoutCache
 
 func init() {
-	timestampCache = make(map[int64]string)
+	timestampCache = cache.NewTimeoutCache(int64(24) * time.Hour)
 }
 
 func getStringRepresentation(unix int64) string {
 	// Check cache
-	if val, ok := timestampCache[unix]; ok {
+	if val, ok := timestampCache.Get(unix); ok {
 		return val
 	}
 
 	// Calc new string
 	str := strconv.FormatInt(unix, 10);
-	timestampCache[unix] = str
+	timestampCache.Add(unix, str)
 	return str
 }
 
