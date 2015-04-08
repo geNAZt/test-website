@@ -97,7 +97,7 @@ func SendView(c *websocket.Connection) {
 
 	// Check if user is owner of this View or if its a system view
 	systemUserId, _ := beego.AppConfig.Int("SystemUserID")
-	if view.Owner.Id == int32(systemUserId) || view.Owner.Id == int32(c.Session.Get("userId")) {
+	if view.Owner.Id == int32(systemUserId) || view.Owner.Id == c.Session.Get("userId").(int32) {
 		// Send the user all servers which belong to this view
 		jsonResponse := JSONResponse{
 			Ident: "servers",
