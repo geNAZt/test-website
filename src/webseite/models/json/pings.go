@@ -73,8 +73,8 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 	// Ask the Database for 24h Ping
 	sql := qb.String()
 
-	var pings []TempPingRow
-	_, err := o.Raw(sql, past24Hours).QueryRows(&pings)
+	var pings []orm.Params
+	_, err := o.Raw(sql, past24Hours).Values(&pings)
 	if err == nil {
 		length := len(pings) / len(serverIds)
 		shouldSkip := 0
@@ -87,16 +87,20 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 		for pingI := range pings {
 			sqlPing := pings[pingI]
 
+			serverId, _ := int32( strconv.ParseInt(sqlPing["server_id"].(string), 10, 32) );
+			time, _ := time.ParseInLocation(createdFormat, sqlPing["time"].(string), time.Local)
+			online, _ := int32( strconv.ParseInt(sqlPing["online"].(string), 10, 32) );
+
 			if shouldSkip > 0 {
-				if shouldSkip > skip[sqlPing.ServerId] {
-					skip[sqlPing.ServerId]++
+				if shouldSkip > skip[serverId] {
+					skip[serverId]++
 					continue
 				}
 
-				skip[sqlPing.ServerId] = 0
-				returnMap[sqlPing.ServerId].Players[getStringRepresentation(sqlPing.Time.Unix())] = sqlPing.Online
+				skip[serverId] = 0
+				returnMap[serverId].Players[getStringRepresentation(time.Unix())] = online
 			} else {
-				returnMap[sqlPing.ServerId].Players[getStringRepresentation(sqlPing.Time.Unix())] = sqlPing.Online
+				returnMap[serverId].Players[getStringRepresentation(time.Unix())] = online
 			}
 		}
 	}
