@@ -53,8 +53,12 @@ var wsFuncs = {
         });
     },
     pings: function(data) {
-        servers[data["Id"]]["Players"] = data["Players"];
+        data.forEach(function(value) {
+            servers[value["Id"]]["Players"] = value["Players"];
+        });
+
         rerenderChart();
+        $("#slider").slider("option", "disabled", false);
     },
     updatePlayer: function (data) {
         servers[data["Id"]]["Online"] = data["Online"];
@@ -362,6 +366,7 @@ $(document).ready(function () {
                     conn.send("range:" + time / (24*60));
                     sendPingIDs();
                     sendTimeout = -1;
+                    $("#slider").slider("option", "disabled", true);
                 }, 3000)
             }
         }

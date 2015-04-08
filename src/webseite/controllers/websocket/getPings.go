@@ -34,17 +34,21 @@ func sendPings(m websocket.Message) {
 	}
 
 	jsonServers := json.GetPingResponse(serverId, int32(m.Connection.Session.Get("days").(int)))
-	for sId := range jsonServers {
-		jsonResponse := &json.JSONResponse{
-			Ident: "pings",
-			Value: &json.JSONPingResponse{
-				Id: jsonServers[sId].Id,
-				Players: jsonServers[sId].Players,
-			},
-		}
+	sendResponse := make([]*json.JSONPingResponse, len(jsonServers))
 
-		jsonResponse.Send(m.Connection)
+	for sId := range jsonServers {
+		sendResponse[sId] = json.JSONPingResponse{
+			Id: jsonServers[sId].Id,
+			Players: jsonServers[sId].Players,
+		}
 	}
+
+	jsonResponse := &json.JSONResponse{
+		Ident: "pings",
+		Value: sendResponse,
+	}
+
+	jsonResponse.Send(m.Connection)
 
 	elapsed := time.Since(start)
 	json.SendLog(m.Connection, "Sending Pings took " + fmt.Sprintf("%s", elapsed) )
