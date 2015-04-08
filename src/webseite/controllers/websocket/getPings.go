@@ -37,10 +37,10 @@ func sendPings(m websocket.Message) {
 	sendResponse := make([]*json.JSONPingResponse, len(jsonServers))
 
 	for sId := range jsonServers {
-		sendResponse[sId] = &json.JSONPingResponse{
+		append(sendResponse, &json.JSONPingResponse{
 			Id: jsonServers[sId].Id,
 			Players: jsonServers[sId].Players,
-		}
+		})
 	}
 
 	jsonResponse := &json.JSONResponse{
