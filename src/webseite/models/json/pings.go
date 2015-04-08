@@ -47,7 +47,7 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 	qb.Select("`time`, `server_id`, `online`").
 		From("`ping`").
 		Where("`server_id`").
-		In(sqlIds).
+		In(sqlIds...).
 		And("`time` > ?").
 		OrderBy("`time`").
 		Asc()
