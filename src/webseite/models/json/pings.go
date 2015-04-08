@@ -91,19 +91,16 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 			time, _ := time.ParseInLocation(createdFormat, sqlPing["time"].(string), time.Local)
 			online, _ := strconv.ParseInt(sqlPing["online"].(string), 10, 32);
 
-			serverId = int32(serverId)
-			online = int32(online)
-
 			if shouldSkip > 0 {
-				if shouldSkip > skip[serverId] {
-					skip[serverId]++
+				if shouldSkip > skip[int32(serverId)] {
+					skip[int32(serverId)]++
 					continue
 				}
 
-				skip[serverId] = 0
-				returnMap[serverId].Players[getStringRepresentation(time.Unix())] = online
+				skip[int32(serverId)] = 0
+				returnMap[int32(serverId)].Players[getStringRepresentation(time.Unix())] = int32(online)
 			} else {
-				returnMap[serverId].Players[getStringRepresentation(time.Unix())] = online
+				returnMap[int32(serverId)].Players[getStringRepresentation(time.Unix())] = int32(online)
 			}
 		}
 	}
