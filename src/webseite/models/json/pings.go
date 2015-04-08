@@ -43,12 +43,12 @@ func getParsedTime(representation string) time.Time {
 func getParsedInt(representation string) int32 {
 	// Check cache
 	if val, ok := parseCache.Get(representation); ok {
-		return val.(int64)
+		return val.(int32)
 	}
 
 	// Calc new integer
 	str, _ := strconv.ParseInt(representation, 10, 32);
-	parseCache.Add(representation, str)
+	parseCache.Add(representation, int32(str))
 	return int32(str)
 }
 
@@ -116,9 +116,9 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 		for pingI := range pings {
 			sqlPing := pings[pingI]
 
-			serverId, _ := getParsedInt(sqlPing["server_id"].(string))
-			time, _ := getParsedTime(sqlPing["time"].(string))
-			online, _ := getParsedInt(sqlPing["online"].(string))
+			serverId := getParsedInt(sqlPing["server_id"].(string))
+			time := getParsedTime(sqlPing["time"].(string))
+			online := getParsedInt(sqlPing["online"].(string))
 
 			if shouldSkip > 0 {
 				if shouldSkip > skip[int32(serverId)] {
