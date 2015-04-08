@@ -87,9 +87,12 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 		for pingI := range pings {
 			sqlPing := pings[pingI]
 
-			serverId, _ := int32( strconv.ParseInt(sqlPing["server_id"].(string), 10, 32) );
+			serverId, _ := strconv.ParseInt(sqlPing["server_id"].(string), 10, 32);
 			time, _ := time.ParseInLocation(createdFormat, sqlPing["time"].(string), time.Local)
-			online, _ := int32( strconv.ParseInt(sqlPing["online"].(string), 10, 32) );
+			online, _ := strconv.ParseInt(sqlPing["online"].(string), 10, 32);
+
+			serverId = int32(serverId)
+			online = int32(online)
 
 			if shouldSkip > 0 {
 				if shouldSkip > skip[serverId] {
