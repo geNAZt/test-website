@@ -21,7 +21,7 @@ type TempPingRow struct {
 var timestampCache cache.TimeoutCache
 
 func init() {
-	timestampCache = cache.NewTimeoutCache(int64(24) * time.Hour)
+	timestampCache, _ = cache.NewTimeoutCache(int64(24) * int64(time.Hour))
 }
 
 func getStringRepresentation(unix int64) string {
