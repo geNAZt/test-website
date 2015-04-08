@@ -24,6 +24,11 @@ func (c *MainController) Get() {
 		c.DelSession("profile.registerComplete")
 	}
 
+	// Check for login id
+	if c.GetSession("userId") == nil {
+		c.SetSession("userId", int32(-1))
+	}
+
 	c.Data["flash"] = flashes
 	c.Data["host"] = "minecrafttracker.net"
 	c.TplNames = "index.tpl"

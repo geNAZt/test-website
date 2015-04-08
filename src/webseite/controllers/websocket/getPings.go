@@ -26,8 +26,6 @@ func listenGetPings() {
 }
 
 func sendPings(m websocket.Message) {
-	start := time.Now()
-
 	serverId := ParseInts(m)
 	if serverId[0] == -1 {
 		return
@@ -49,7 +47,4 @@ func sendPings(m websocket.Message) {
 	}
 
 	jsonResponse.Send(m.Connection)
-
-	elapsed := time.Since(start)
-	json.SendLog(m.Connection, "Sending Pings took " + fmt.Sprintf("%s", elapsed) )
 }

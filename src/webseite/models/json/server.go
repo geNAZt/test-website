@@ -10,6 +10,7 @@ import (
 	"webseite/cache"
 	"webseite/models"
 	"webseite/websocket"
+	"webseite/models/json"
 )
 
 const createdFormat = "2006-01-02 15:04:05"
@@ -69,6 +70,56 @@ func init() {
 
 	Favicons = tempCache
 	Servers = make(map[int32]Server)
+}
+
+func SendView(c *websocket.Connection) {
+	// In case the Websocket closes
+	defer func() {
+		recover()
+	}()
+
+	// Get the default View
+	// ORM
+	o := orm.NewOrm()
+	o.Using("default")
+
+	// Build up the Query
+	qb, _ := orm.NewQueryBuilder("mysql")
+	qb.Select("*").
+		From("`view`").
+		Where("`id` = ?")
+
+	// Get the SQL Statement and execute it
+	sql := qb.String()
+	view := &models.View{}
+	o.Raw(sql, c.Session.Get("view").(int32)).QueryRow(&view)
+	o.LoadRelated(view, "Servers")
+	o.LoadRelated(view, "Owner")
+
+	// Check if user is owner of this View or if its a system view
+	systemUserId, _ := beego.AppConfig.Int("SystemUserID")
+	if view.Owner.Id == int32(systemUserId) || view.Owner.Id == int32(c.Session.Get("userId")) {
+		// Send the user all servers which belong to this view
+		jsonResponse := JSONResponse{
+			Ident: "servers",
+			Value: []Server{},
+		}
+
+		for serverI := range view.Servers {
+			server := GetServer(view.Servers[serverI].Id)
+			if server.Id != -1 {
+				jsonResponse.Value = append(jsonResponse.Value.([]Server), server)
+			}
+		}
+
+		jsonBytes, err := gojson.Marshal(jsonResponse)
+		if err != nil {
+			beego.BeeLogger.Warn("Could not convert to json: %v", err)
+			return
+		}
+
+		c.Send <- jsonBytes
+	}
 }
 
 func ReloadServers(servers []models.Server) {
@@ -131,51 +182,6 @@ func ReloadServers(servers []models.Server) {
 		jsonServer.RecalcRecord()
 		Servers[jsonServer.Id] = jsonServer
 	}
-}
-
-func SendLog(c *websocket.Connection, message string) {
-	defer func() {
-		recover()
-	}()
-
-	jsonResponse := JSONResponse{
-		Ident: "log",
-		Value: message,
-	}
-
-	jsonBytes, err := gojson.Marshal(jsonResponse)
-	if err != nil {
-		beego.BeeLogger.Warn("Could not convert to json: %v", err)
-		return
-	}
-
-	c.Send <- jsonBytes
-}
-
-func SendAllServers(c *websocket.Connection, view *models.View) {
-	defer func() {
-		recover()
-	}()
-
-	jsonResponse := JSONResponse{
-		Ident: "servers",
-		Value: []Server{},
-	}
-
-	for serverI := range view.Servers {
-		server := GetServer(view.Servers[serverI].Id)
-		if server.Id != -1 {
-			jsonResponse.Value = append(jsonResponse.Value.([]Server), server)
-		}
-	}
-
-	jsonBytes, err := gojson.Marshal(jsonResponse)
-	if err != nil {
-		beego.BeeLogger.Warn("Could not convert to json: %v", err)
-		return
-	}
-
-	c.Send <- jsonBytes
 }
 
 func SendFavicon(c *websocket.Connection, serverId int32, favicon string) {
