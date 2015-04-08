@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"webseite/models/json"
 	"webseite/websocket"
-	"time"
-	"fmt"
 )
 
 func init() {
