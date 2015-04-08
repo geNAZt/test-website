@@ -19,7 +19,7 @@ type TempPingRow struct {
 
 func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse {
 	// Prepare the map
-	sqlString := ""
+	sqlIds := make([]string, len(serverIds))
 	returnMap := make(map[int32]*JSONPingResponse)
 	skip := make(map[int32]int)
 	for sId := range serverIds {
@@ -29,9 +29,8 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 		}
 
 		skip[serverIds[sId]] = 0
-		sqlString += "`server_id` = '" + strconv.FormatInt(int64(serverIds[sId]),10) + "' OR "
+		sqlIds[sId] = strconv.FormatInt(int64(serverIds[sId]),10)
 	}
-	sqlString = sqlString[:len(sqlString) - 4]
 
 	// Construct pasttime and the map
 	_, offset := time.Now().Zone()
@@ -47,7 +46,8 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 	qb, _ := orm.NewQueryBuilder("mysql")
 	qb.Select("`time`, `server_id`, `online`").
 		From("`ping`").
-		Where("(" + sqlString + ")").
+		Where("`server_id`").
+		In(sqlIds).
 		And("`time` > ?").
 		OrderBy("`time`").
 		Asc()
