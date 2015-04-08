@@ -17,6 +17,24 @@ type TempPingRow struct {
 	Online int32
 }
 
+var timestampCache map[int64]string
+
+func init() {
+	timestampCache = make(map[int64]string)
+}
+
+func getStringRepresentation(unix int64) {
+	// Check cache
+	if val, ok := timestampCache[unix]; ok {
+		return val
+	}
+
+	// Calc new string
+	str := strconv.FormatInt(unix, 10);
+	timestampCache[unix] = str
+	return str
+}
+
 func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse {
 	// Prepare the map
 	sqlIds := make([]string, len(serverIds))
@@ -76,9 +94,9 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 				}
 
 				skip[sqlPing.ServerId] = 0
-				returnMap[sqlPing.ServerId].Players[strconv.FormatInt(sqlPing.Time.Unix(), 10)] = sqlPing.Online
+				returnMap[sqlPing.ServerId].Players[getStringRepresentation(sqlPing.Time.Unix())] = sqlPing.Online
 			} else {
-				returnMap[sqlPing.ServerId].Players[strconv.FormatInt(sqlPing.Time.Unix(), 10)] = sqlPing.Online
+				returnMap[sqlPing.ServerId].Players[getStringRepresentation(sqlPing.Time.Unix())] = sqlPing.Online
 			}
 		}
 	}
