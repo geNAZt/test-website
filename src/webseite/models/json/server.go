@@ -10,7 +10,6 @@ import (
 	"webseite/cache"
 	"webseite/models"
 	"webseite/websocket"
-	"fmt"
 )
 
 const createdFormat = "2006-01-02 15:04:05"
@@ -113,8 +112,6 @@ func SendAvailableViews(c *websocket.Connection) {
 		Ident: "views",
 		Value: make(map[string]int32, len(views)),
 	}
-
-	fmt.Printf("%v", views)
 
 	for viewI := range views {
 		view := views[viewI]

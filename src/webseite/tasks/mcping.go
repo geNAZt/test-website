@@ -4,7 +4,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	"github.com/astaxie/beego/toolbox"
-	status "github.com/geNAZt/minecraft-status"
+	statusresolver "github.com/geNAZt/minecraft-status"
 	statusdata "github.com/geNAZt/minecraft-status/data"
 	"time"
 	"webseite/models"
@@ -100,17 +100,20 @@ func ping(server *models.Server) {
 	}
 
 	// Make ping
-	status, err := status.GetStatus(server.Ip, fetchAnimated)
+	status, err := statusresolver.GetStatus(server.Ip, fetchAnimated)
 	if err != nil {
-		beego.BeeLogger.Warn("Error while pinging: %v", err)
+		status, err = statusresolver.GetStatus(server.Ip, fetchAnimated)
+		if err != nil {
+			beego.BeeLogger.Warn("Error while pinging: %v", err)
 
-		// Create "fake" ping
-		status = &statusdata.Status{
-			Players: &statusdata.MCPlayers{
-				Online: 0,
-				Max:    0,
-			},
-			Ping: time.Duration(30 * time.Second),
+			// Create "fake" ping
+			status = &statusdata.Status{
+				Players: &statusdata.MCPlayers{
+					Online: 0,
+					Max:    0,
+				},
+				Ping: time.Duration(30 * time.Second),
+			}
 		}
 	}
 
