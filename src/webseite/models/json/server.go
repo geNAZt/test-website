@@ -10,7 +10,6 @@ import (
 	"webseite/cache"
 	"webseite/models"
 	"webseite/websocket"
-	"container/list"
 )
 
 const createdFormat = "2006-01-02 15:04:05"
