@@ -10,6 +10,7 @@ import (
 	"webseite/cache"
 	"webseite/models"
 	"webseite/websocket"
+	"container/list"
 )
 
 const createdFormat = "2006-01-02 15:04:05"
@@ -161,12 +162,16 @@ func SendView(c *websocket.Connection) {
 			Value: []Server{},
 		}
 
+		serverIds := make(map[int32]bool, len(view.Servers))
 		for serverI := range view.Servers {
 			server := GetServer(view.Servers[serverI].Id)
 			if server.Id != -1 {
+				serverIds[server.Id] = true
 				jsonResponse.Value = append(jsonResponse.Value.([]Server), server)
 			}
 		}
+
+		c.Session.Set("servers", serverIds)
 
 		jsonBytes, err := gojson.Marshal(jsonResponse)
 		if err != nil {
@@ -327,7 +332,20 @@ func UpdateStatus(id int32, status *status.Status) {
 		return
 	}
 
-	websocket.Hub.Broadcast <- jsonBytes
+	for c := range websocket.Hub.Connections {
+		allowedServers := c.Session.Get("servers").(map[int32]bool)
+		if val, ok := allowedServers[server.Id]; !ok || !val {
+			continue
+		}
+
+		select {
+		case c.Send <- jsonBytes:
+		default:
+			c.CloseCustomChannels()
+			close(c.Send)
+			delete(websocket.Hub.Connections, c)
+		}
+	}
 }
 
 func (s *Server) RecalcRecord() {

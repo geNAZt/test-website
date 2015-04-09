@@ -29,7 +29,7 @@ type Message struct {
 
 type hub struct {
 	// Registered connections.
-	connections map[*Connection]bool
+	Connections map[*Connection]bool
 
 	// Inbound messages from the connections.
 	Broadcast chan []byte
@@ -51,7 +51,7 @@ var Hub = &hub{
 	Broadcast:   make(chan []byte, maxMessageSize),
 	register:    make(chan *Connection, 1),
 	unregister:  make(chan *Connection, 1),
-	connections: make(map[*Connection]bool),
+	Connections: make(map[*Connection]bool),
 	messages:    make(chan Message),
 	eventSystem: &EventSystem{},
 }
@@ -65,19 +65,19 @@ func (h *hub) run() {
 	for {
 		select {
 		case c := <-h.register:
-			h.connections[c] = true
+			h.Connections[c] = true
 		case c := <-h.unregister:
 			c.CloseCustomChannels()
 			close(c.Send)
-			delete(h.connections, c)
+			delete(h.Connections, c)
 		case m := <-h.Broadcast:
-			for c := range h.connections {
+			for c := range h.Connections {
 				select {
 				case c.Send <- m:
 				default:
 					c.CloseCustomChannels()
 					close(c.Send)
-					delete(h.connections, c)
+					delete(h.Connections, c)
 				}
 			}
 		case m := <-h.messages:
