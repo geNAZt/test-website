@@ -16,5 +16,8 @@ func (w *WSController) Get() {
 	w.EnableRender = false
 	w.SetSession("days", 2)
 	w.SetSession("view", int32(defaultView))
-	json.SendView(websocket.Upgrade(w.Controller))
+
+	conn := websocket.Upgrade(w.Controller)
+	json.SendView(conn)
+	json.SendAvailableViews(conn);
 }

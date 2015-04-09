@@ -10,6 +10,8 @@ var currentColorI = 0;
 var time = 2 * 24 * 60;
 var favicons = {};
 var sendTimeout = -1;
+var fullRender = false;
+var selectData = [];
 
 //Better to construct options first and then pass it as a parameter
 var options = {
@@ -36,12 +38,17 @@ var options = {
 var wsFuncs = {
     servers: function (data) {
         servers = {};
+        currentColorI = 0;
+        time = 2 * 24 * 60;
+        graphSettings = [];
+        favicons = {};
 
         data.forEach(function (value) {
             value["Color"] = getColor();
             servers[value["Id"]] = value;
         });
 
+        rerenderChart();
         sendPingIDs();
         sortServers( true );
 
@@ -92,6 +99,35 @@ var wsFuncs = {
     },
     log: function(data) {
         console.log(data);
+    },
+    views: function(data) {
+        first = null
+
+        for (var key in data) {
+            if (data.hasOwnProperty(key)) {
+                if ( first == null ) {
+                    first = key;
+                }
+
+                selectData.push({
+                    id: data[key],
+                    text: key
+                })
+            }
+        }
+
+        $("#views").select2({
+            data: selectData,
+            initSelection: function(element, callback) {
+                callback({id: data[element.val()], text: element.val()});
+            }
+        }).on('change', function(val) {
+            conn.send("setview:" + val.val);
+        });
+
+        $("#views").select2("val", first);
+
+        $(".select2-arrow").html("<i class=\"fa fa-angle-down pull-right\" style=\"margin-top: 0;\"></i>");
     }
 };
 
@@ -133,6 +169,10 @@ function generateData(server) {
         name: server["Name"],
         dataPoints: []
     };
+
+    if ( server["Players"] == undefined ) {
+        return data;
+    }
 
     length = Object.keys(server["Players"]).length;
 
@@ -187,7 +227,7 @@ function renderTable( renderAnimatedFavicons ) {
             return;
         }
 
-        if (rendered == 5) {
+        if (rendered == 5 && !fullRender) {
             return;
         }
 
@@ -352,6 +392,19 @@ $(document).ready(function () {
     var height = window.innerHeight - 49;
     $('#main').css('min-height', height);
 
+    /*$("#edit-server").click(function() {
+        $("#chartContainer").hide();
+        $("#slider").hide();
+        $("#page-selection").hide();
+
+            $("#edit-control").show();
+            $("#edit-button").hide();
+
+        skip = 0;
+        fullRender = table;
+        renderTable( true );
+    });*/
+
     $("#slider").slider({
         range: "min",
         value: 2,
@@ -371,6 +424,9 @@ $(document).ready(function () {
             }
         }
     });
+
+    //$("#edit-control").hide();
+    //$("#edit-button").show();
 
     connectToWebSocket(host);
 });

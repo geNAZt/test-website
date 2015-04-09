@@ -10,6 +10,7 @@ import (
 	"webseite/cache"
 	"webseite/models"
 	"webseite/websocket"
+	"fmt"
 )
 
 const createdFormat = "2006-01-02 15:04:05"
@@ -36,6 +37,11 @@ type PlayerUpdate struct {
 	Ping24  int32
 	Record  int32
 	Average int32
+}
+
+type JSONSendViews struct {
+	Ident string
+	Value map[string]int32
 }
 
 type JSONUpdatePlayerResponse struct {
@@ -69,6 +75,60 @@ func init() {
 
 	Favicons = tempCache
 	Servers = make(map[int32]Server)
+}
+
+func SendAvailableViews(c *websocket.Connection) {
+	// In case the Websocket closes
+	defer func() {
+		recover()
+	}()
+
+	// Get the default View
+	// ORM
+	o := orm.NewOrm()
+	o.Using("default")
+
+	// Build up the Query
+	qb, _ := orm.NewQueryBuilder("mysql")
+	qb = qb.Select("*").
+		From("`view`").
+		Where("`owner_id` = ?")
+
+	systemUserId, _ := beego.AppConfig.Int("SystemUserID")
+
+	// Check if User is logged in, if so include his views
+	var rawSeter orm.RawSeter
+	if c.Session.Get("userId").(int32) != -1 {
+		qb.Or("`owner_id` = ?")
+		rawSeter = o.Raw(qb.String(), int32(systemUserId), c.Session.Get("userId").(int32))
+	} else {
+		rawSeter = o.Raw(qb.String(), int32(systemUserId))
+	}
+
+	views := []models.View{}
+	rawSeter.QueryRows(&views)
+
+	// Remap for JSON
+	jsonResponse := &JSONSendViews{
+		Ident: "views",
+		Value: make(map[string]int32, len(views)),
+	}
+
+	fmt.Printf("%v", views)
+
+	for viewI := range views {
+		view := views[viewI]
+		jsonResponse.Value[view.Name] = view.Id
+	}
+
+	// Send to client
+	jsonBytes, err := gojson.Marshal(jsonResponse)
+	if err != nil {
+		beego.BeeLogger.Warn("Could not convert to json: %v", err)
+		return
+	}
+
+	c.Send <- jsonBytes
 }
 
 func SendView(c *websocket.Connection) {

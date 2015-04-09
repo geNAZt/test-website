@@ -10,6 +10,7 @@
     <link href="{{ "plugins/jquery-ui/jquery-ui.min.css" | asset }}" rel="stylesheet">
     <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
     <link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
+    <link href="{{ "plugins/select2/select2.css" | asset }}" rel="stylesheet"/>
     <link href="{{ "css/style.css" | asset }}" rel="stylesheet">
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -26,19 +27,19 @@
     <script src="{{ "js/devoops.js" | asset }}"></script>
     <script src="{{ "js/jquery.canvasjs.min.js" | asset }}"></script>
     <script src="{{ "js/jquery.bootpag.min.js" | asset }}"></script>
+    <script src="{{ "plugins/select2/select2.js" | asset }}"></script>
     <script type="text/javascript">
         host = {{ .host }};
     </script>
 
     <script>
         (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
                 m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
         })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
         ga('create', 'UA-58112178-1', 'auto');
         ga('send', 'pageview');
-
     </script>
 </head>
 <body>
@@ -46,20 +47,28 @@
 <header class="navbar">
     <div class="container-fluid expanded-panel">
         <div class="row">
-            <div id="logo" class="col-xs-10 col-sm-10">
+            <div id="logo" class="col-xs-1 col-sm-1">
                 <a href="/">MineTracker</a>
             </div>
 
-            <ul class="nav navbar-nav pull-right panel-menu col-xs-2 col-sm-2">
+            <ul class="nav navbar-nav pull-left panel-menu col-xs-2 col-sm-2">
+                <li class="view-selector">
+                    <span id="views"></span>
+                </li>
+            </ul>
+
+            <ul class="nav navbar-nav pull-right panel-menu col-xs-9 col-sm-9">
                 <li id="logoimg">
                     <a href="/"></a>
                 </li>
                 <li class="dropdown" style="float:right;">
-                    <!--<a href="#" class="dropdown-toggle account" data-toggle="dropdown">
+                    <!-- <a href="#" class="dropdown-toggle account" data-toggle="dropdown">
                         <div class="avatar">
-                            <img src="https://avatars3.githubusercontent.com/u/3252854?v=3&s=460" class="img-circle" alt="avatar">
+                            <img src="https://avatars3.githubusercontent.com/u/3252854?v=3&s=460" class="img-circle"
+                                 alt="avatar">
                         </div>
                         <i class="fa fa-angle-down pull-right"></i>
+
                         <div class="user-mini pull-right">
                             <span class="welcome">Welcome,</span>
                             <span>Fabian Faßbender</span>
@@ -90,9 +99,9 @@
                                 <span>Logout</span>
                             </a>
                         </li>
-                    </ul>
-                    <span class="btn btn-success btn-login"><a href="/login/">Login</a></span>
-                    <span class="btn btn-danger btn-login"><a href="/profile/register/">Register</a></span>-->
+                    </ul> -->
+                    <span class="btn btn-success btn-login"><a href="#">Login</a></span>
+                    <span class="btn btn-danger btn-login"><a href="#">Register</a></span>
                 </li>
             </ul>
         </div>
@@ -113,10 +122,15 @@
                     setTimeout(function() {
                         $('#flash-register').fadeOut();
                     }, 5000);
+
                 </script>
                 {{ end }}
-
-                <h2 class="table-header">Tracked Servers</h2>
+                <!-- <span class="btn btn-success btn-add" id="edit-button"><a href="#" id="edit-server"><i class="fa fa-pencil"></i><span> Edit Servers</span></a></span>
+                <span id="edit-control">
+                <span class="btn btn-success btn-add"><a href="#" id="add-server"><i class="fa fa-plus"></i><span> Add Server</span></a></span>
+                <span class="placeholder-left"></span>
+                <span class="btn btn-danger btn-add"><a href="#" id="remove-server"><i class="fa fa-minus"></i><span> Remove Server</span></a></span>
+                    </span> -->
 
                 <div id="page-selection"></div>
                 <div id="server-table" class="table-responsive">

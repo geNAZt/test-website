@@ -140,6 +140,8 @@ func init() {
 }
 
 func main() {
+	orm.Debug = true
+
 	// Error.
 	err := orm.RunSyncdb("default", false, false)
 	if err != nil {

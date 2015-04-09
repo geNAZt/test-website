@@ -3,6 +3,7 @@ package websocket
 import (
 	"bytes"
 	"webseite/websocket"
+	"webseite/models/json"
 )
 
 func init() {
@@ -29,4 +30,5 @@ func setView(m websocket.Message) {
 	}
 
 	m.Connection.Session.Set("view", viewId)
+	json.SendView(m.Connection)
 }
