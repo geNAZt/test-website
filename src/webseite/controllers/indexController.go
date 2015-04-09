@@ -30,6 +30,6 @@ func (c *MainController) Get() {
 	}
 
 	c.Data["flash"] = flashes
-	c.Data["host"] = "localhost:8080"//"minecrafttracker.net"
+	c.Data["host"] = "minecrafttracker.net"
 	c.TplNames = "index.tpl"
 }
