@@ -5,6 +5,7 @@ import (
 	"time"
 	"webseite/models/json"
 	"webseite/websocket"
+	"fmt"
 )
 
 func init() {
@@ -32,7 +33,12 @@ func displayAnimatedFavicon(m websocket.Message) {
 
 	for serverI := range serverIds {
 		serverId := serverIds[serverI]
+
+		fmt.Printf("Looking up favicons for Server: %v", serverId)
+
 		server := json.GetServer(serverId)
+		fmt.Printf("Server has %v favicons cached", len(server.Favicons))
+
 		if server.Id != -1 && len(server.Favicons) > 1 {
 			for faviconI := range server.Favicons {
 				favicon := server.Favicons[faviconI]
