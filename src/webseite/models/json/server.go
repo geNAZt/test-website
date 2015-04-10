@@ -304,7 +304,7 @@ func UpdateStatus(id int32, status *status.Status) {
 			MaxPlayers: max,
 		}
 
-		jsonMaxPlayer.BroadcastToServerID(server.Id)
+		jsonMaxPlayer.Broadcast()
 		server.MaxPlayers = max
 	}
 
