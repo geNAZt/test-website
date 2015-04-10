@@ -94,8 +94,8 @@ var wsFuncs = {
         sortServers( false );
     },
     favicon: function(data) {
-        if (favicons[data["Server"]] !== undefined) {
-            favicons[data["Server"]].attr("src", data["Icon"]);
+        if (favicons[data["Id"]] !== undefined) {
+            favicons[data["Id"]].attr("src", data["Icon"]);
         }
     },
     log: function(data) {
@@ -279,7 +279,7 @@ function createTR(server, renderAnimatedFavicons) {
     favicon.attr('src', server["Favicon"]);
 
     if ( renderAnimatedFavicons && conn != null ) {
-        favicons[server["Name"]] = favicon;
+        favicons[server["Id"]] = favicon;
 
         if ( animatedTimeout == -1 ) {
             animatedTimeout = window.setTimeout(function() {
