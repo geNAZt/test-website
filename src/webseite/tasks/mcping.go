@@ -111,7 +111,6 @@ func ping(server *models.Server) {
 					Online: 0,
 					Max:    0,
 				},
-				Ping: time.Duration(30 * time.Second),
 			}
 		}
 	}
