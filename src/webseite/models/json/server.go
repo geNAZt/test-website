@@ -43,11 +43,6 @@ type JSONUpdatePlayerResponse struct {
 	Value PlayerUpdate
 }
 
-type JSONUpdateFaviconResponse struct {
-	Ident string
-	Value ServerFavicon
-}
-
 type ServerFavicon struct {
 	Id   int32
 	Icon string
@@ -72,11 +67,6 @@ func init() {
 }
 
 func SendAvailableViews(c *websocket.Connection) {
-	// In case the Websocket closes
-	defer func() {
-		recover()
-	}()
-
 	// Get the default View
 	// ORM
 	o := orm.NewOrm()
@@ -117,11 +107,6 @@ func SendAvailableViews(c *websocket.Connection) {
 }
 
 func SendView(c *websocket.Connection) {
-	// In case the Websocket closes
-	defer func() {
-		recover()
-	}()
-
 	// Get the default View
 	// ORM
 	o := orm.NewOrm()
@@ -158,14 +143,7 @@ func SendView(c *websocket.Connection) {
 		}
 
 		c.Session.Set("servers", serverIds)
-
-		jsonBytes, err := gojson.Marshal(jsonResponse)
-		if err != nil {
-			beego.BeeLogger.Warn("Could not convert to json: %v", err)
-			return
-		}
-
-		c.Send <- jsonBytes
+		jsonResponse.Send(c)
 	}
 }
 
@@ -231,11 +209,7 @@ func ReloadServers(servers []models.Server) {
 }
 
 func SendFavicon(c *websocket.Connection, serverId int32, favicon string) {
-	defer func() {
-		recover()
-	}()
-
-	fav := JSONUpdateFaviconResponse{
+	fav := JSONResponse{
 		Ident: "favicon",
 		Value: ServerFavicon{
 			Icon: favicon,
@@ -243,13 +217,7 @@ func SendFavicon(c *websocket.Connection, serverId int32, favicon string) {
 		},
 	}
 
-	jsonBytes, err := gojson.Marshal(fav)
-	if err != nil {
-		beego.BeeLogger.Warn("Could not convert to json: %v", err)
-		return
-	}
-
-	c.Send <- jsonBytes
+	fav.Send(c)
 }
 
 func GetServer(id int32) Server {

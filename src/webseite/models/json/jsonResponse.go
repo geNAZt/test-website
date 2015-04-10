@@ -42,13 +42,15 @@ func (j *JSONResponse) BroadcastToServerID(serverID int32) {
 }
 
 func (j *JSONResponse) Send(c *websocket.Connection) {
-	defer func() {
-		recover()
-	}()
-
 	by := j.marshal()
 	if len(by) != 0 {
-		c.Send <- by
+		select {
+		case c.Send <- by:
+		default:
+			c.CloseCustomChannels()
+			close(c.Send)
+			delete(websocket.Hub.Connections, c)
+		}
 	}
 }
 
