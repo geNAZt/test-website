@@ -38,20 +38,12 @@ type PlayerUpdate struct {
 	Average int32
 }
 
-type JSONSendViews struct {
-	JSONResponse
-	Ident string
-	Value map[string]int32
-}
-
 type JSONUpdatePlayerResponse struct {
-	JSONResponse
 	Ident string
 	Value PlayerUpdate
 }
 
 type JSONUpdateFaviconResponse struct {
-	JSONResponse
 	Ident string
 	Value ServerFavicon
 }
@@ -110,7 +102,7 @@ func SendAvailableViews(c *websocket.Connection) {
 	rawSeter.QueryRows(&views)
 
 	// Remap for JSON
-	jsonResponse := &JSONSendViews{
+	jsonResponse := &JSONResponse{
 		Ident: "views",
 		Value: make(map[string]int32, len(views)),
 	}

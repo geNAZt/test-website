@@ -5,7 +5,6 @@ import (
 )
 
 type JSONMaxPlayerResponse struct {
-	JSONResponse
 	Id         int32
 	MaxPlayers int32
 }
