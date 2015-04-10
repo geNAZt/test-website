@@ -43,26 +43,9 @@ type JSONUpdatePlayerResponse struct {
 	Value PlayerUpdate
 }
 
-type ServerFavicon struct {
-	Id   int32
-	Icon string
-}
-
-type StoredFavicon struct {
-	Favicon  string
-	Favicons []status.Favicon
-}
-
 var Servers map[int32]Server
-var Favicons *cache.TimeoutCache
 
 func init() {
-	tempCache, err := cache.NewFaviconCache()
-	if err != nil {
-		panic("Could not init favicon cache")
-	}
-
-	Favicons = tempCache
 	Servers = make(map[int32]Server)
 }
 
@@ -196,9 +179,9 @@ func ReloadServers(servers []models.Server) {
 		}
 
 		// Get the Favicons for this Server entities
-		if ent, ok := Favicons.Get(jsonServer.Name); ok {
-			jsonServer.Favicons = ent.(StoredFavicon).Favicons
-			jsonServer.Favicon = ent.(StoredFavicon).Favicon
+		if ent, ok := cache.Favicons.Get(jsonServer.Name); ok {
+			jsonServer.Favicons = ent.(cache.StoredFavicon).Favicons
+			jsonServer.Favicon = ent.(cache.StoredFavicon).Favicon
 		}
 
 		// Recalc Average and record counters
@@ -206,18 +189,6 @@ func ReloadServers(servers []models.Server) {
 		jsonServer.RecalcRecord()
 		Servers[jsonServer.Id] = jsonServer
 	}
-}
-
-func SendFavicon(c *websocket.Connection, serverId int32, favicon string) {
-	fav := JSONResponse{
-		Ident: "favicon",
-		Value: ServerFavicon{
-			Icon: favicon,
-			Id:   serverId,
-		},
-	}
-
-	fav.Send(c)
 }
 
 func GetServer(id int32) Server {
@@ -247,12 +218,12 @@ func UpdateStatus(id int32, status *status.Status) {
 		server.Favicon = status.Favicon
 		server.Favicons = status.Favicons
 
-		storedFavicon := StoredFavicon{
+		storedFavicon := cache.StoredFavicon{
 			Favicon:  server.Favicon,
 			Favicons: server.Favicons,
 		}
 
-		Favicons.Add(server.Name, storedFavicon)
+		cache.Favicons.Add(server.Name, storedFavicon)
 	}
 
 	jsonPlayerUpdate := JSONUpdatePlayerResponse{

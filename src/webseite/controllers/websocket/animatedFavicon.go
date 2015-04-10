@@ -25,22 +25,30 @@ func listenAnimatedFavicon() {
 }
 
 func displayAnimatedFavicon(m websocket.Message) {
-	serverId := ParseInt(m)
-	if serverId == -1 {
+	serverIds := ParseInts(m)
+	if serverIds[0] == -1 {
 		return
 	}
 
-	server := json.GetServer(serverId)
-	if server.Id != -1 && len(server.Favicons) > 1 {
-		for faviconI := range server.Favicons {
-			favicon := server.Favicons[faviconI]
+	for serverI := range serverIds {
+		serverId := serverIds[serverI]
+		server := json.GetServer(serverId)
+		if server.Id != -1 && len(server.Favicons) > 1 {
+			for faviconI := range server.Favicons {
+				favicon := server.Favicons[faviconI]
 
-			if favicon.Icon == "" {
-				continue
+				if favicon.Icon == "" {
+					continue
+				}
+
+				serverFavicon := &json.ServerFavicon{
+					Id: serverId,
+					Icon: favicon.Icon,
+				}
+
+				serverFavicon.Send(m.Connection)
+				time.Sleep(time.Duration(favicon.DisplayTime) * time.Millisecond)
 			}
-
-			json.SendFavicon(m.Connection, serverId, favicon.Icon)
-			time.Sleep(time.Duration(favicon.DisplayTime) * time.Millisecond)
 		}
 	}
 }

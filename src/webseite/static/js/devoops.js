@@ -10,6 +10,7 @@ var currentColorI = 0;
 var time = 2 * 24 * 60;
 var favicons = {};
 var sendTimeout = -1;
+var animatedTimeout = -1;
 var fullRender = false;
 var selectData = [];
 
@@ -280,9 +281,12 @@ function createTR(server, renderAnimatedFavicons) {
     if ( renderAnimatedFavicons && conn != null ) {
         favicons[server["Name"]] = favicon;
 
-        window.setTimeout(function() {
-            conn.send("animated:" + server["Name"]);
-        }, 500);
+        if ( animatedTimeout == -1 ) {
+            animatedTimeout = window.setTimeout(function() {
+                sendAnimationIDs();
+                animatedTimeout = -1;
+            }, 500);
+        }
     }
 
     nameTd = $('<td />');
@@ -368,6 +372,19 @@ function connectToWebSocket(host) {
                 wsFuncs[jsonData["Ident"]](jsonData["Value"]);
             }
         };
+    }
+}
+
+function sendAnimationIDs() {
+    var animationIDs = "";
+
+    serversCopy = servers;
+    for (var key in serversCopy) {
+        animationIDs += ":" + serversCopy[key]["Id"];
+    }
+
+    if ( animationIDs != "" ) {
+        conn.send("animated" + animationIDs);
     }
 }
 

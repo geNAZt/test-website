@@ -1,7 +1,22 @@
 package cache
 
-import "time"
+import (
+	"time"
+	status "github.com/geNAZt/minecraft-status/data"
+)
 
-func NewFaviconCache() (*TimeoutCache, error) {
-	return NewTimeoutCache(int64(60) * int64(time.Minute))
+type StoredFavicon struct {
+	Favicon  string
+	Favicons []status.Favicon
+}
+
+var Favicons *TimeoutCache
+
+func init() {
+	tempCache, err := NewTimeoutCache(int64(60) * int64(time.Minute))
+	if err != nil {
+		panic("Could not init favicon cache")
+	}
+
+	Favicons = tempCache
 }
