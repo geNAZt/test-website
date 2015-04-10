@@ -11,6 +11,7 @@ import (
 	"webseite/models/json"
 	"webseite/util"
 	"sync"
+	"webseite/cache"
 )
 
 var servers []models.Server
@@ -93,7 +94,7 @@ func ping(server *models.Server) {
 	// Ask the JSON side if we have a animated Favicon
 	fetchFavicon := true
 	fetchAnimated := server.DownloadAnimatedFavicon
-	if _, ok := json.Favicons.Get(server.Name); ok {
+	if _, ok := cache.Favicons.Get(server.Name); ok {
 		fetchFavicon = false
 		fetchAnimated = false
 	}
