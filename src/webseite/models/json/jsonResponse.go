@@ -21,6 +21,26 @@ func (j *JSONResponse) marshal() []byte {
 	return jsonBytes
 }
 
+func (j *JSONResponse) BroadcastToServerID(serverID int32) {
+	jsonBytes := j.marshal()
+	if len(jsonBytes) > 0 {
+		for c := range websocket.Hub.Connections {
+			allowedServers := c.Session.Get("servers").(map[int32]bool)
+			if val, ok := allowedServers[serverID]; !ok || !val {
+				continue
+			}
+
+			select {
+			case c.Send <- jsonBytes:
+			default:
+				c.CloseCustomChannels()
+				close(c.Send)
+				delete(websocket.Hub.Connections, c)
+			}
+		}
+	}
+}
+
 func (j *JSONResponse) Send(c *websocket.Connection) {
 	defer func() {
 		recover()
