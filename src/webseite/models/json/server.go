@@ -109,7 +109,7 @@ func SendAvailableViews(c *websocket.Connection) {
 
 	for viewI := range views {
 		view := views[viewI]
-		jsonResponse.Value[view.Name] = view.Id
+		jsonResponse.Value.(map[string]int32)[view.Name] = view.Id
 	}
 
 	// Send to client
