@@ -39,16 +39,19 @@ type PlayerUpdate struct {
 }
 
 type JSONSendViews struct {
+	JSONResponse
 	Ident string
 	Value map[string]int32
 }
 
 type JSONUpdatePlayerResponse struct {
+	JSONResponse
 	Ident string
 	Value PlayerUpdate
 }
 
 type JSONUpdateFaviconResponse struct {
+	JSONResponse
 	Ident string
 	Value ServerFavicon
 }
@@ -85,7 +88,6 @@ func SendAvailableViews(c *websocket.Connection) {
 	// Get the default View
 	// ORM
 	o := orm.NewOrm()
-	o.Using("default")
 
 	// Build up the Query
 	qb, _ := orm.NewQueryBuilder("mysql")
@@ -119,13 +121,7 @@ func SendAvailableViews(c *websocket.Connection) {
 	}
 
 	// Send to client
-	jsonBytes, err := gojson.Marshal(jsonResponse)
-	if err != nil {
-		beego.BeeLogger.Warn("Could not convert to json: %v", err)
-		return
-	}
-
-	c.Send <- jsonBytes
+	jsonResponse.Send(c)
 }
 
 func SendView(c *websocket.Connection) {
@@ -137,7 +133,6 @@ func SendView(c *websocket.Connection) {
 	// Get the default View
 	// ORM
 	o := orm.NewOrm()
-	o.Using("default")
 
 	// Build up the Query
 	qb, _ := orm.NewQueryBuilder("mysql")
@@ -185,7 +180,6 @@ func SendView(c *websocket.Connection) {
 func ReloadServers(servers []models.Server) {
 	// Prepare ORM (database)
 	o := orm.NewOrm()
-	o.Using("default")
 
 	// Get the current time
 	_, offset := time.Now().Zone()
@@ -318,7 +312,7 @@ func UpdateStatus(id int32, status *status.Status) {
 			MaxPlayers: max,
 		}
 
-		jsonMaxPlayer.Broadcast()
+		jsonMaxPlayer.BroadcastToServerID(server.Id)
 		server.MaxPlayers = max
 	}
 
@@ -350,7 +344,6 @@ func UpdateStatus(id int32, status *status.Status) {
 func (s *Server) RecalcRecord() {
 	// ORM
 	o := orm.NewOrm()
-	o.Using("default")
 
 	// Build up the Query
 	qb, _ := orm.NewQueryBuilder("mysql")
@@ -375,7 +368,6 @@ func (s *Server) RecalcRecord() {
 func (s *Server) RecalcAverage() {
 	// ORM
 	o := orm.NewOrm()
-	o.Using("default")
 
 	// Build up the Query
 	qb, _ := orm.NewQueryBuilder("mysql")

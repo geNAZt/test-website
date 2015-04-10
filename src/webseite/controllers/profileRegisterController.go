@@ -43,7 +43,6 @@ func (c *ProfileRegisterController) Get() {
 func (c *ProfileRegisterController) Post() {
 	// ORM
 	o := orm.NewOrm()
-	o.Using("default")
 
 	email := c.GetString("email")
 	pass := c.GetString("password")

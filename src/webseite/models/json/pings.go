@@ -49,7 +49,6 @@ func GetPingResponse(serverIds []int32, days int32) map[int32]*JSONPingResponse 
 
 	// ORM
 	o := orm.NewOrm()
-	o.Using("default")
 
 	// Check for 24h Ping
 	past24Hours := time.Unix( (time.Now().Add(time.Duration(-days*24*60) * time.Minute).Unix()) - int64(offset), 0 ).Format( createdFormat )

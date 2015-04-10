@@ -21,7 +21,6 @@ var serverMutex = &sync.Mutex{}
 func InitTasks() {
 	// ORM
 	o := orm.NewOrm()
-	o.Using("default")
 
 	// Build up the Query
 	qb, _ := orm.NewQueryBuilder("mysql")
