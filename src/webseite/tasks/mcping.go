@@ -95,6 +95,7 @@ func ping(server *models.Server) {
 	fetchAnimated := server.DownloadAnimatedFavicon
 	if _, ok := json.Favicons.Get(server.Name); ok {
 		fetchFavicon = false
+		fetchAnimated = false
 	}
 
 	// Make ping
