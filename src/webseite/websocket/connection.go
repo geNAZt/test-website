@@ -51,6 +51,7 @@ func Upgrade(w beego.Controller) *Connection {
 		}
 	}()
 	c.AppendChannel(close)
+	c.Open = true
 
 	return c
 }
@@ -68,6 +69,9 @@ type Connection struct {
 
 	// Session from HTTP Request
 	Session session.SessionStore
+
+	// Boolean of the open state
+	Open bool
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -137,6 +141,8 @@ func (c *Connection) AppendChannel(channel chan struct{}) {
 }
 
 func (c *Connection) CloseCustomChannels() {
+	c.Open = false
+
 	for _, c := range c.customChannels {
 		close(c)
 	}

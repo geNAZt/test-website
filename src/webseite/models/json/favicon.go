@@ -7,11 +7,11 @@ type ServerFavicon struct {
     Icon string
 }
 
-func (s *ServerFavicon) Send(c *websocket.Connection) {
+func (s *ServerFavicon) Send(c *websocket.Connection) bool {
     fav := JSONResponse{
         Ident: "favicon",
         Value: s,
     }
 
-    fav.Send(c)
+    return fav.Send(c)
 }

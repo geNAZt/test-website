@@ -34,8 +34,13 @@ func displayAnimatedFavicon(m websocket.Message) {
 		serverId := serverIds[serverI]
 		server := json.GetServer(serverId)
 		if server.Id != -1 && len(server.Favicons) > 1 {
+			abort := false
 			go func() {
 				for faviconI := range server.Favicons {
+					if abort {
+						break;
+					}
+
 					favicon := server.Favicons[faviconI]
 
 					if favicon.Icon == "" {
@@ -47,7 +52,7 @@ func displayAnimatedFavicon(m websocket.Message) {
 						Icon: favicon.Icon,
 					}
 
-					serverFavicon.Send(m.Connection)
+					abort = !serverFavicon.Send(m.Connection)
 					time.Sleep(time.Duration(favicon.DisplayTime) * time.Millisecond)
 				}
 			}()
