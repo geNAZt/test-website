@@ -42,6 +42,10 @@ func (j *JSONResponse) BroadcastToServerID(serverID int32) {
 }
 
 func (j *JSONResponse) Send(c *websocket.Connection) {
+	defer func(){
+		recover()
+	}()
+
 	by := j.marshal()
 	if len(by) != 0 {
 		select {
