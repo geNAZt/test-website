@@ -1,150 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>MineTracker</title>
-    <meta name="description" content="description">
-    <meta name="author" content="geNAZt">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="{{ "plugins/bootstrap/bootstrap.css" | asset }}" rel="stylesheet">
-    <link href="{{ "plugins/jquery-ui/jquery-ui.min.css" | asset }}" rel="stylesheet">
-    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-    <link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
-    <link href="{{ "plugins/select2/select2.css" | asset }}" rel="stylesheet"/>
-    <link href="{{ "css/style.css" | asset }}" rel="stylesheet">
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-    <script src="http://getbootstrap.com/docs-assets/js/html5shiv.js"></script>
-    <script src="http://getbootstrap.com/docs-assets/js/respond.min.js"></script>
-    <![endif]-->
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <!--<script src="http://code.jquery.com/jquery.js"></script>-->
-    <script src="{{ "plugins/jquery/jquery-2.1.0.min.js" | asset }}"></script>
-    <script src="{{ "plugins/jquery-ui/jquery-ui.min.js" | asset }}"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="{{ "plugins/bootstrap/bootstrap.min.js" | asset }}"></script>
+{{ template "layout.tpl" . }}
+
+{{ define "js" }}
     <!-- All functions for this theme + document.ready processing -->
-    <script src="{{ "js/devoops.js" | asset }}"></script>
-    <script src="{{ "js/jquery.canvasjs.min.js" | asset }}"></script>
     <script src="{{ "js/jquery.bootpag.min.js" | asset }}"></script>
+    <script src="{{ "js/jquery.canvasjs.min.js" | asset }}"></script>
     <script src="{{ "plugins/select2/select2.js" | asset }}"></script>
+    <script src="{{ "js/devoops.js" | asset }}"></script>
     <script type="text/javascript">
         host = {{ .host }};
     </script>
+{{ end }}
 
-    <script>
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+{{ define "css" }}
+    <link href="{{ "plugins/select2/select2.css" | asset }}" rel="stylesheet"/>
+{{ end }}
 
-        ga('create', 'UA-58112178-1', 'auto');
-        ga('send', 'pageview');
-    </script>
-</head>
-<body>
-<!--Start Header-->
-<header class="navbar">
-    <div class="container-fluid expanded-panel">
-        <div class="row">
-            <div id="logo" class="col-xs-1 col-sm-1">
-                <a href="/">MineTracker</a>
-            </div>
+{{ define "content" }}
+    <div id="inner-content" class="col-xs-10 col-sm-10">
+        <br/>
 
-            <ul class="nav navbar-nav pull-left panel-menu col-xs-2 col-sm-2">
-                <li class="view-selector">
-                    <span id="views"></span>
-                </li>
-            </ul>
+        {{ if isset .flash "registerComplete" }}
+        <p id="flash-register" class="txt-success" style="text-align: center;">{{ .flash.registerComplete }}</p>
+        <script type="application/javascript">
+            setTimeout(function() {
+                $('#flash-register').fadeOut();
+            }, 5000);
 
-            <ul class="nav navbar-nav pull-right panel-menu col-xs-9 col-sm-9">
-                <li id="logoimg">
-                    <a href="/"></a>
-                </li>
-                <li class="dropdown" style="float:right;">
-                    <!-- <a href="#" class="dropdown-toggle account" data-toggle="dropdown">
-                        <div class="avatar">
-                            <img src="https://avatars3.githubusercontent.com/u/3252854?v=3&s=460" class="img-circle"
-                                 alt="avatar">
-                        </div>
-                        <i class="fa fa-angle-down pull-right"></i>
+        </script>
+        {{ end }}
+        <!-- <span class="btn btn-success btn-add" id="edit-button"><a href="#" id="edit-server"><i class="fa fa-pencil"></i><span> Edit Servers</span></a></span>
+        <span id="edit-control">
+        <span class="btn btn-success btn-add"><a href="#" id="add-server"><i class="fa fa-plus"></i><span> Add Server</span></a></span>
+        <span class="placeholder-left"></span>
+        <span class="btn btn-danger btn-add"><a href="#" id="remove-server"><i class="fa fa-minus"></i><span> Remove Server</span></a></span>
+            </span> -->
 
-                        <div class="user-mini pull-right">
-                            <span class="welcome">Welcome,</span>
-                            <span>Fabian Faßbender</span>
-                        </div>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a href="/profile/alerts/">
-                                <i class="fa fa-bell"></i>
-                                <span>Alerts</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/profile/views/" class="ajax-link">
-                                <i class="fa fa-picture-o"></i>
-                                <span>Views</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/profile/settings/">
-                                <i class="fa fa-cog"></i>
-                                <span>Settings</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/logout/">
-                                <i class="fa fa-power-off"></i>
-                                <span>Logout</span>
-                            </a>
-                        </li>
-                    </ul> -->
-                    <span class="btn btn-success btn-login"><a href="#">Login</a></span>
-                    <span class="btn btn-danger btn-login"><a href="#">Register</a></span>
-                </li>
-            </ul>
+        <div id="page-selection"></div>
+        <div id="server-table" class="table-responsive">
+            <table class="table table-hover">
+
+            </table>
         </div>
+        <div id="slider"></div>
+        <div id="chartContainer" style="height: 800px; width: 100%;"></div>
     </div>
-</header>
-<!--End Header-->
-<!--Start Container-->
-<div id="main" class="container-fluid">
-    <div class="row">
-        <!--Start Content-->
-        <div id="content" class="col-xs-12 col-sm-12">
-            <div id="inner-content" class="col-xs-10 col-sm-10">
-                <br/>
-
-                {{ if isset .flash "registerComplete" }}
-                <p id="flash-register" class="txt-success" style="text-align: center;">{{ .flash.registerComplete }}</p>
-                <script type="application/javascript">
-                    setTimeout(function() {
-                        $('#flash-register').fadeOut();
-                    }, 5000);
-
-                </script>
-                {{ end }}
-                <!-- <span class="btn btn-success btn-add" id="edit-button"><a href="#" id="edit-server"><i class="fa fa-pencil"></i><span> Edit Servers</span></a></span>
-                <span id="edit-control">
-                <span class="btn btn-success btn-add"><a href="#" id="add-server"><i class="fa fa-plus"></i><span> Add Server</span></a></span>
-                <span class="placeholder-left"></span>
-                <span class="btn btn-danger btn-add"><a href="#" id="remove-server"><i class="fa fa-minus"></i><span> Remove Server</span></a></span>
-                    </span> -->
-
-                <div id="page-selection"></div>
-                <div id="server-table" class="table-responsive">
-                    <table class="table table-hover">
-
-                    </table>
-                </div>
-                <div id="slider"></div>
-                <div id="chartContainer" style="height: 800px; width: 100%;"></div>
-            </div>
-        </div>
-        <!--End Content-->
-    </div>
-</div>
-<!--End Container-->
-</body>
-</html>
+{{ end }}
