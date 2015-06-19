@@ -1,134 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>MineTracker</title>
-    <meta name="description" content="description">
-    <meta name="author" content="geNAZt">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="{{ "plugins/bootstrap/bootstrap.css" | asset }}" rel="stylesheet">
-    <link href="{{ "plugins/jquery-ui/jquery-ui.min.css" | asset }}" rel="stylesheet">
-    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-    <link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
-    <link href="{{ "css/style.css" | asset }}" rel="stylesheet">
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-    <script src="http://getbootstrap.com/docs-assets/js/html5shiv.js"></script>
-    <script src="http://getbootstrap.com/docs-assets/js/respond.min.js"></script>
-    <![endif]-->
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <!--<script src="http://code.jquery.com/jquery.js"></script>-->
-    <script src="{{ "plugins/jquery/jquery-2.1.0.min.js" | asset }}"></script>
-    <script src="{{ "plugins/jquery-ui/jquery-ui.min.js" | asset }}"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="{{ "plugins/bootstrap/bootstrap.min.js" | asset }}"></script>
-    <!-- All functions for this theme + document.ready processing -->
-    <script src="{{ "js/jquery.canvasjs.min.js" | asset }}"></script>
-    <script src="{{ "js/jquery.bootpag.min.js" | asset }}"></script>
+{{ template "layout.tpl" . }}
 
-    <script>
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-        ga('create', 'UA-58112178-1', 'auto');
-        ga('send', 'pageview');
-
-    </script>
-</head>
-<body>
-<!--Start Header-->
-<header class="navbar">
-    <div class="container-fluid expanded-panel">
-        <div class="row">
-            <div id="logo" class="col-xs-10 col-sm-10">
-                <a href="/">MineTracker</a>
-            </div>
-
-            <ul class="nav navbar-nav pull-right panel-menu col-xs-2 col-sm-2">
-                <li id="logoimg">
-                    <a href="/"></a>
-                </li>
-                <li class="dropdown" style="float:right;">
-                    <!--<a href="#" class="dropdown-toggle account" data-toggle="dropdown">
-                        <div class="avatar">
-                            <img src="https://avatars3.githubusercontent.com/u/3252854?v=3&s=460" class="img-circle" alt="avatar">
-                        </div>
-                        <i class="fa fa-angle-down pull-right"></i>
-                        <div class="user-mini pull-right">
-                            <span class="welcome">Welcome,</span>
-                            <span>Fabian Faßbender</span>
-                        </div>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a href="/profile/alerts/">
-                                <i class="fa fa-bell"></i>
-                                <span>Alerts</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/profile/views/" class="ajax-link">
-                                <i class="fa fa-picture-o"></i>
-                                <span>Views</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/profile/settings/">
-                                <i class="fa fa-cog"></i>
-                                <span>Settings</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/logout/">
-                                <i class="fa fa-power-off"></i>
-                                <span>Logout</span>
-                            </a>
-                        </li>
-                    </ul>-->
-                    <span class="btn btn-success btn-login"><a href="/login/">Login</a></span>
-                    <span class="btn btn-danger btn-login"><a href="/profile/register/">Register</a></span>
-                </li>
-            </ul>
-        </div>
-    </div>
-</header>
-<!--End Header-->
-<!--Start Container-->
-<div id="main" class="container-fluid">
-    <div class="row">
-        <!--Start Content-->
-        <div id="content" class="col-xs-12 col-sm-12">
-            <div id="inner-content" class="col-xs-4 col-sm-4">
-                <div class="box">
-                    <div class="box-content">
-                        <form action="/profile/register/" method="POST" enctype="application/x-www-form-urlencoded">
-                            <div class="text-center">
-                                <h3 class="page-header">MineTracker Register Page</h3>
-                                <p class="txt-info">You can create custom Graphs using the Servers you want to see</p>
-                            </div>
-                            <div class="form-group{{ if isset .errors "email" }} has-error{{ end }}">
-                                <label class="control-label">E-mail</label>
-                                <input type="text" class="form-control" name="email" value="{{ .lastEmail }}">
-                                {{ if isset .errors "email" }}<p class="txt-danger">{{ .errors.email }}</p>{{ end }}
-                            </div>
-                            <div class="form-group{{ if isset .errors "password" }} has-error{{ end }}">
-                                <label class="control-label">Password</label>
-                                <input type="password" class="form-control" name="password">
-                                {{ if isset .errors "password" }}<p class="txt-danger">{{ .errors.password }}</p>{{ end }}
-                            </div>
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-primary">Register</button>
-                            </div>
-                        </form>
+{{ define "content" }}
+    <div id="inner-content" class="col-xs-4 col-sm-4">
+        <div class="box">
+            <div class="box-content">
+                <form action="/profile/register/" method="POST" enctype="application/x-www-form-urlencoded">
+                    <div class="text-center">
+                        <h3 class="page-header">MineTracker Register Page</h3>
+                        <p class="txt-info">You can create custom Graphs using the Servers you want to see</p>
                     </div>
-                </div>
+                    <div class="form-group{{ if isset .errors "email" }} has-error{{ end }}">
+                        <label class="control-label">E-mail</label>
+                        <input type="text" class="form-control" name="email" value="{{ .lastEmail }}">
+                        {{ if isset .errors "email" }}<p class="txt-danger">{{ .errors.email }}</p>{{ end }}
+                    </div>
+                    <div class="form-group{{ if isset .errors "password" }} has-error{{ end }}">
+                        <label class="control-label">Password</label>
+                        <input type="password" class="form-control" name="password">
+                        {{ if isset .errors "password" }}<p class="txt-danger">{{ .errors.password }}</p>{{ end }}
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Register</button>
+                    </div>
+                </form>
             </div>
         </div>
-        <!--End Content-->
     </div>
-</div>
-<!--End Container-->
-</body>
-</html>
+{{ end }}
