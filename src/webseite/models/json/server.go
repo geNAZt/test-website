@@ -139,55 +139,57 @@ func ReloadServers(servers []models.Server) {
 
 	// Iterate over all Servers to calc 24h Pings
 	for serverI := range servers {
-		sqlServer := servers[serverI]
+        go func() {
+            sqlServer := servers[serverI]
 
-		// Check if there is a old entry
-		jsonServer := Server{
-			Online: 0,
-		}
-		if tempJsonServer, ok := Servers[sqlServer.Id]; ok {
-			jsonServer = tempJsonServer
-		}
+            // Check if there is a old entry
+            jsonServer := Server{
+                Online: 0,
+            }
+            if tempJsonServer, ok := Servers[sqlServer.Id]; ok {
+                jsonServer = tempJsonServer
+            }
 
-		// Update basic informations
-		jsonServer.Id = sqlServer.Id
-		jsonServer.IP = sqlServer.Ip
-		jsonServer.Name = sqlServer.Name
-		jsonServer.Website = sqlServer.Website
+            // Update basic informations
+            jsonServer.Id = sqlServer.Id
+            jsonServer.IP = sqlServer.Ip
+            jsonServer.Name = sqlServer.Name
+            jsonServer.Website = sqlServer.Website
 
-		// Check for 24h Ping
-		past24Hours := time.Unix( (time.Now().Add(time.Duration(-24*60) * time.Minute).Unix()) - int64(offset), 0 ).Format( createdFormat )
-		past24HoursAnd2Minutes := time.Unix( (time.Now().Add(time.Duration((-24*60)+2) * time.Minute).Unix()) - int64(offset), 0 ).Format( createdFormat )
+            // Check for 24h Ping
+            past24Hours := time.Unix((time.Now().Add(time.Duration(-24*60) * time.Minute).Unix()) - int64(offset), 0).Format(createdFormat)
+            past24HoursAnd2Minutes := time.Unix((time.Now().Add(time.Duration((-24*60)+2) * time.Minute).Unix()) - int64(offset), 0).Format(createdFormat)
 
-		// Build up the Query
-		qb, _ := orm.NewQueryBuilder("mysql")
-		qb.Select("*").
-			From("`ping`").
-			Where("`server_id` = ?").
-			And("`time` > ?").And("`time` < ?").
-			OrderBy("`time`").
-			Desc().
-			Limit(1)
+            // Build up the Query
+            qb, _ := orm.NewQueryBuilder("mysql")
+            qb.Select("*").
+            From("`ping`").
+            Where("`server_id` = ?").
+            And("`time` > ?").And("`time` < ?").
+            OrderBy("`time`").
+            Desc().
+            Limit(1)
 
-		// Ask the Database for 24h Ping
-		sql := qb.String()
-		ping := models.Ping{}
+            // Ask the Database for 24h Ping
+            sql := qb.String()
+            ping := models.Ping{}
 
-		err := o.Raw(sql, strconv.FormatInt(int64(jsonServer.Id), 10), past24Hours, past24HoursAnd2Minutes).QueryRow(&ping)
-		if err == nil {
-			jsonServer.Ping24 = ping.Online
-		}
+            err := o.Raw(sql, strconv.FormatInt(int64(jsonServer.Id), 10), past24Hours, past24HoursAnd2Minutes).QueryRow(&ping)
+            if err == nil {
+                jsonServer.Ping24 = ping.Online
+            }
 
-		// Get the Favicons for this Server entities
-		if ent, ok := cache.Favicons.Get(jsonServer.Name); ok {
-			jsonServer.Favicons = ent.(cache.StoredFavicon).Favicons
-			jsonServer.Favicon = ent.(cache.StoredFavicon).Favicon
-		}
+            // Get the Favicons for this Server entities
+            if ent, ok := cache.Favicons.Get(jsonServer.Name); ok {
+                jsonServer.Favicons = ent.(cache.StoredFavicon).Favicons
+                jsonServer.Favicon = ent.(cache.StoredFavicon).Favicon
+            }
 
-		// Recalc Average and record counters
-		jsonServer.RecalcAverage()
-		jsonServer.RecalcRecord()
-		Servers[jsonServer.Id] = jsonServer
+            // Recalc Average and record counters
+            jsonServer.RecalcAverage()
+            jsonServer.RecalcRecord()
+            Servers[jsonServer.Id] = jsonServer
+        }();
 	}
 }
 
