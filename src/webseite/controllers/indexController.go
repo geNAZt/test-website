@@ -14,15 +14,9 @@ func (c *MainController) Get() {
 		c.DelSession("profile.register.lastEmail")
 	}
 
-	// Read additional data from session
-	flashRegisterComplete := c.GetSession("profile.registerComplete")
-
-	// Check for flashes
-	flashes := make(map[string]interface{})
-	if flashRegisterComplete != nil {
-		flashes["registerComplete"] = flashRegisterComplete
-		c.DelSession("profile.registerComplete")
-	}
+    // Read flash
+    flash := beego.ReadFromRequest(&c.Controller)
+    flashes := flash.Data
 
 	// Check for login id
 	if c.GetSession("userId") == nil {

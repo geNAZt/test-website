@@ -41,6 +41,9 @@ func (c *ProfileRegisterController) Get() {
 }
 
 func (c *ProfileRegisterController) Post() {
+    // Generate new Flash Data
+    flash := beego.NewFlash()
+
 	// ORM
 	o := orm.NewOrm()
 
@@ -115,7 +118,8 @@ func (c *ProfileRegisterController) Post() {
 	o.Insert(user)
 
 	// Flash for MainPage
-	c.SetSession("profile.registerComplete", "Your registration has been completed. Please check your Inbox for activation")
+    flash.Success("Your registration has been completed. Please check your Inbox for activation")
+    flash.Store(&c.Controller)
 
 	// Redirect back to the Mainpage
 	c.Redirect("/", 302)
