@@ -37,7 +37,7 @@ func (c *AcceptController) Get() {
         // Reset the token and update
         user := users[0]
         user.AcceptToken = ""
-        o.Update(user)
+        o.Update(&user)
 
         // Flash for MainPage
         flash.Success("Your account has been activated. You can login now")
