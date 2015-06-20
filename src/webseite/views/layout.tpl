@@ -12,6 +12,19 @@
     <link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
     <link href="{{ "css/style.css" | asset }}" rel="stylesheet">
     {{ template "css" . }}
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="http://getbootstrap.com/docs-assets/js/html5shiv.js"></script>
+    <script src="http://getbootstrap.com/docs-assets/js/respond.min.js"></script>
+    <![endif]-->
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <!--<script src="http://code.jquery.com/jquery.js"></script>-->
+    <script src="{{ "plugins/jquery/jquery-2.1.0.min.js" | asset }}"></script>
+    <script src="{{ "plugins/jquery-ui/jquery-ui.min.js" | asset }}"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="{{ "plugins/bootstrap/bootstrap.min.js" | asset }}"></script>
+    {{ template "js" . }}
 </head>
 <body>
 <!--Start Header-->
@@ -90,18 +103,5 @@
     </div>
 </div>
 <!--End Container-->
-
-<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-<!--[if lt IE 9]>
-<script src="http://getbootstrap.com/docs-assets/js/html5shiv.js"></script>
-<script src="http://getbootstrap.com/docs-assets/js/respond.min.js"></script>
-<![endif]-->
-<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-<!--<script src="http://code.jquery.com/jquery.js"></script>-->
-<script src="{{ "plugins/jquery/jquery-2.1.0.min.js" | asset }}"></script>
-<script src="{{ "plugins/jquery-ui/jquery-ui.min.js" | asset }}"></script>
-<!-- Include all compiled plugins (below), or include individual files as needed -->
-<script src="{{ "plugins/bootstrap/bootstrap.min.js" | asset }}"></script>
-{{ template "js" . }}
 </body>
 </html>
