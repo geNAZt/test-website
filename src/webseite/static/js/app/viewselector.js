@@ -26,7 +26,7 @@ define(function() {
                     callback({id: data[element.val()], text: element.val()});
                 }
             }).on('change', function(val) {
-                conn.send("setview:" + val.val);
+                ui.getSocket().setView(val.val);
             });
 
             $("#views").select2("val", first);

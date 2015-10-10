@@ -74,6 +74,10 @@ define(function () {
          */
         this.sendRange = function (time) {
             socketConnection.send("range:" + time / (24 * 60));
+        };
+
+        this.setView = function(view) {
+            socketConnection.send("setview:" + view);
         }
     }
 });
