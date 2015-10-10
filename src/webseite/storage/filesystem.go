@@ -7,6 +7,7 @@ import (
 	"path"
 	"strings"
 	"webseite/cache"
+	"fmt"
 )
 
 type fileSystemStorage struct {
@@ -65,6 +66,8 @@ func (s *fileSystemStorage) Store(bytes []byte, filename string) (bool, error) {
 }
 
 func (s *fileSystemStorage) Exists(filename string) bool {
+	fmt.Println(storageDir + "/" + filename)
+
 	value, ok := fsExistsCache.Get(filename)
 	if !ok {
 		stat, err := os.Stat(storageDir + "/" + filename)
