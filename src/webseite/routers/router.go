@@ -11,5 +11,6 @@ func init() {
 
     // Register routes
 	beego.Router("/profile/register/", &controllers.ProfileRegisterController{})
+    beego.Router("/profile/login/", &controllers.ProfileLoginController{})
     beego.Router("/profile/accept/:token([A-Za-z]{64})", &controllers.AcceptController{})
 }

@@ -27,3 +27,11 @@
         </div>
     </div>
 {{ end }}
+
+{{ define "js" }}
+
+{{ end }}
+
+{{ define "css" }}
+
+{{ end }}

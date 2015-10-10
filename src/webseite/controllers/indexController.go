@@ -25,5 +25,7 @@ func (c *MainController) Get() {
 
 	c.Data["flash"] = flashes
 	c.Data["host"] = "minecrafttracker.net"
+    c.Data["showViewSelector"] = true
+    c.Data["user"] = c.GetSession("user")
 	c.TplNames = "index.tpl"
 }

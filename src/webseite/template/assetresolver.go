@@ -9,6 +9,15 @@ import (
 func init() {
 	beego.AddFuncMap("asset", AssetResolver)
 	beego.AddFuncMap("isset", IsSet)
+    beego.AddFuncMap("getAvatar", GetAvatar)
+}
+
+func GetAvatar(url string) string {
+    if url == "default" {
+        return AssetResolver("/avatar/default.png")
+    }
+
+    return AssetResolver("/avatar/default.png")
 }
 
 func AssetResolver(filename string) string {
