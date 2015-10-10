@@ -8,7 +8,7 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
         var socket = null,
             currentServers = {},
             allServers = {},
-            viewSelector = new ViewSelector( this );
+            viewSelector = new ViewSelector( this),
             serverTable = new ServerTable( this ),
             chart = new Chart( this ),
             self = this;
@@ -23,6 +23,8 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
             socket.registerFunction("servers", this.onNewServers);
             socket.registerFunction("pings", this.onPings);
             socket.registerFunction("views", this.onViews);
+            socket.registerFunction("updatePlayer", this.onPlayerUpdate);
+            socket.registerFunction("maxPlayer", this.onMaxPlayerUpdate);
         };
 
         this.getSocket = function() {
@@ -36,6 +38,29 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
          */
         this.getServers = function() {
             return currentServers;
+        };
+
+        this.onMaxPlayerUpdate = function(data) {
+            allServers[data["Id"]]["MaxPlayers"] = data["MaxPlayers"];
+
+            if (currentServers.hasOwnProperty(data["Id"])) {
+                currentServers[data["Id"]] = allServers[data["Id"]];
+                serverTable.render(false);
+            }
+        };
+
+        this.onPlayerUpdate = function(data) {
+            allServers[data["Id"]]["Online"] = data["Online"];
+            allServers[data["Id"]]["Average"] = data["Average"];
+            allServers[data["Id"]]["Record"] = data["Record"];
+            allServers[data["Id"]]["Ping24"] = data["Ping24"];
+            allServers[data["Id"]]["Players"][data["Time"]] = data["Online"];
+
+            if (currentServers.hasOwnProperty(data["Id"])) {
+                currentServers[data["Id"]] = allServers[data["Id"]];
+                serverTable.render(false);
+                chart.render();
+            }
         };
 
         this.onPings = function(data) {
