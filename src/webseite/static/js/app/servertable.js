@@ -111,8 +111,8 @@ define(["lib/heir", "lib/eventEmitter"], function (heir, eventEmitter) {
                 uptimeSpan.attr( "data-original-title", ( server['Uptime'] - server['UptimeLast'] ) + " % uptime gained" );
             }
 
-            playersTd.append(spanDir);
-            spanDir.tooltip();
+            uptimeTd.append(uptimeSpan);
+            uptimeSpan.tooltip();
 
             uptimeTd.append(server["Uptime"] + " %");
             tr.append(uptimeTd);
