@@ -80,7 +80,7 @@ define(["lib/heir", "lib/eventEmitter"], function (heir, eventEmitter) {
                     spanDir.attr( "data-original-title", ( server['Ping24'] - server['Online'] ) + " users lost in 24 hours" );
                 } else {
                     spanDir.addClass("glyphicon glyphicon-arrow-up");
-                    spanDir.attr( "data-original-title", ( server['Onlint'] - server['Ping24'] ) + " users gained in 24 hours" );
+                    spanDir.attr( "data-original-title", ( server['Online'] - server['Ping24'] ) + " users gained in 24 hours" );
                 }
 
                 playersTd.append(spanDir);
