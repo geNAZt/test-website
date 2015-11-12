@@ -85,15 +85,15 @@
                                 <i class="fa fa-picture-o"></i>
                                 <span>Views</span>
                             </a>
-                        </li>
+                        </li> -->
                         <li>
                             <a href="/profile/settings/">
                                 <i class="fa fa-cog"></i>
                                 <span>Settings</span>
                             </a>
-                        </li> -->
+                        </li>
                         <li>
-                            <a href="/logout/">
+                            <a href="/profile/logout/">
                                 <i class="fa fa-power-off"></i>
                                 <span>Logout</span>
                             </a>
