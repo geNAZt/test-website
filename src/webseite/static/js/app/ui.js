@@ -52,6 +52,7 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
 
         this.onUptimeUpdate = function(data) {
             allServers[data["Id"]]["Uptime"] = data["Uptime"];
+            allServers[data["Id"]]["UptimeLast"] = data["UptimeLast"];
 
             if (currentServers.hasOwnProperty(data["Id"])) {
                 currentServers[data["Id"]] = allServers[data["Id"]];

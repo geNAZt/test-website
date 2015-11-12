@@ -102,7 +102,19 @@ define(["lib/heir", "lib/eventEmitter"], function (heir, eventEmitter) {
 
             // Uptime
             var uptimeTd = $('<td />');
-            uptimeTd.text(server["Uptime"] + " %");
+            var uptimeSpan = $('<span />');
+            if (server['UptimeLast'] > server['Uptime']) {
+                uptimeSpan.addClass("glyphicon glyphicon-arrow-down");
+                uptimeSpan.attr( "data-original-title", ( server['UptimeLast'] - server['Uptime'] ) + " % uptime lost" );
+            } else {
+                uptimeSpan.addClass("glyphicon glyphicon-arrow-up");
+                uptimeSpan.attr( "data-original-title", ( server['Uptime'] - server['UptimeLast'] ) + " % uptime gained" );
+            }
+
+            playersTd.append(spanDir);
+            spanDir.tooltip();
+
+            uptimeTd.append(server["Uptime"] + " %");
             tr.append(uptimeTd);
 
             return tr;
