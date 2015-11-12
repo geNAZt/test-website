@@ -25,6 +25,7 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
             socket.registerFunction("views", this.onViews);
             socket.registerFunction("updatePlayer", this.onPlayerUpdate);
             socket.registerFunction("maxPlayer", this.onMaxPlayerUpdate);
+            socket.registerFunction("uptime", this.onUptimeUpdate);
         };
 
         this.getSocket = function() {
@@ -42,6 +43,15 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
 
         this.onMaxPlayerUpdate = function(data) {
             allServers[data["Id"]]["MaxPlayers"] = data["MaxPlayers"];
+
+            if (currentServers.hasOwnProperty(data["Id"])) {
+                currentServers[data["Id"]] = allServers[data["Id"]];
+                serverTable.render(false);
+            }
+        };
+
+        this.onUptimeUpdate = function(data) {
+            allServers[data["Id"]]["Uptime"] = data["Uptime"];
 
             if (currentServers.hasOwnProperty(data["Id"])) {
                 currentServers[data["Id"]] = allServers[data["Id"]];
@@ -106,17 +116,6 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
             chart.render();
             socket.sendPingIDs( currentServers );
             serverTable.render(true);
-
-            /*
-            sortServers( true );
-
-            $('#page-selection').bootpag({
-                total: Math.ceil(sorted.length / 5)
-            }).on("page", function (event, num) {
-                skip = 5 * (num - 1);
-                sortServers( true );
-            });
-            */
         };
 
         /**

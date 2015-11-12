@@ -25,6 +25,7 @@ type Server struct {
     Average    int32
     Favicon    string
     Ping24     int32
+    Uptime     float32
     Favicons   []status.Favicon `json:"-"`
 }
 
@@ -38,9 +39,17 @@ type PlayerUpdate struct {
     Average int32
 }
 
+type UptimeUpdate struct {
+    Uptime float32
+}
+
 type JSONUpdatePlayerResponse struct {
     Ident string
     Value PlayerUpdate
+}
+
+type dbUptimeResponse struct {
+    Uptime  float32
 }
 
 var Servers map[int32]Server
@@ -144,6 +153,7 @@ func ReloadServers(servers []models.Server) {
         // Check if there is a old entry
         jsonServer := Server{
             Online: 0,
+            Uptime: 0,
         }
         if tempJsonServer, ok := Servers[sqlServer.Id]; ok {
             jsonServer = tempJsonServer
@@ -187,6 +197,7 @@ func ReloadServers(servers []models.Server) {
         // Recalc Average and record counters
         jsonServer.RecalcAverage()
         jsonServer.RecalcRecord()
+        jsonServer.RecalcUptime()
         Servers[jsonServer.Id] = jsonServer
     }
 }
@@ -324,4 +335,31 @@ func (s *Server) RecalcAverage() {
     if len > 0 {
         s.Average = overall / len
     }
+}
+
+func (s *Server) RecalcUptime() {
+    // ORM
+    o := orm.NewOrm()
+
+    // Get the current time
+    _, offset := time.Now().Zone()
+    pastMonth := time.Unix((time.Now().Add(time.Duration(-30 * 24) * time.Hour).Unix()) - int64(offset), 0).Format(createdFormat)
+
+    // Get the SQL Statement and execute it
+    sql := "SELECT 100-((SELECT COUNT(`id`) FROM `ping` WHERE `server_id` = ? AND `online` = 0 AND `time` > ?) / COUNT(`id`)) AS `uptime` FROM `ping` WHERE `server_id` = ? AND `time` > ?;"
+    uptime := []dbUptimeResponse{}
+    o.Raw(sql, s.Id, pastMonth, s.Id, pastMonth).QueryRows(&uptime)
+
+    // Remap
+    s.Uptime = uptime[0].Uptime
+
+    // Send update to all
+    jsonMessage := &JSONResponse{
+        Ident: "uptime",
+        Value: &UptimeUpdate{
+            Uptime: s.Uptime,
+        },
+    }
+
+    jsonMessage.BroadcastToServerID(s.Id)
 }

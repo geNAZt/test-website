@@ -4,7 +4,7 @@
 define(["app/socket", "app/ui"], function(Socket, UI) {
     // Create new Socket connection
     var socket = new Socket();
-    socket.connectToWebSocket("minecrafttracker.net");
+    socket.connectToWebSocket("localhost:8080");
 
     // Create and bind UI
     var ui = new UI();

@@ -10,7 +10,7 @@ define(["lib/heir", "lib/eventEmitter"], function (heir, eventEmitter) {
 
         /** Private methods **/
         function createTH() {
-            return "<thead><tr><th></th><th>ID</th><th>Server Name</th><th>Minecraft IP</th><th>Website</th><th>Players</th><th>Record</th><th>Average (24h)</th></tr></thead>";
+            return "<thead><tr><th></th><th>ID</th><th>Server Name</th><th>Minecraft IP</th><th>Website</th><th>Players</th><th>Record</th><th>Average (24h)</th><th>Uptime (1 month)</th></tr></thead>";
         }
 
         function createTR(server, renderAnimatedFavicons) {
@@ -96,6 +96,11 @@ define(["lib/heir", "lib/eventEmitter"], function (heir, eventEmitter) {
             var averageTd = $('<td />');
             averageTd.text(server["Average"] + " Players");
             tr.append(averageTd);
+
+            // Uptime
+            var uptimeTd = $('<td />');
+            uptimeTd.text(server["Uptime"] + " %");
+            tr.append(uptimeTd);
 
             return tr;
         }
