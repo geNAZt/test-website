@@ -77,10 +77,10 @@ define(["lib/heir", "lib/eventEmitter"], function (heir, eventEmitter) {
                 var spanDir = $('<span />');
                 if (server['Ping24'] > server['Online']) {
                     spanDir.addClass("glyphicon glyphicon-arrow-down");
-                    spanDir.attr( "data-original-title", "The server has " + server['Ping24'] - server['Online'] + " users lost in 24 hours" );
+                    spanDir.attr( "data-original-title", ( server['Ping24'] - server['Online'] ) + " users lost in 24 hours" );
                 } else {
                     spanDir.addClass("glyphicon glyphicon-arrow-up");
-                    spanDir.attr( "data-original-title", "The server has " + server['Onlint'] - server['Ping24'] + " users gained in 24 hours" );
+                    spanDir.attr( "data-original-title", ( server['Onlint'] - server['Ping24'] ) + " users gained in 24 hours" );
                 }
 
                 playersTd.append(spanDir);
