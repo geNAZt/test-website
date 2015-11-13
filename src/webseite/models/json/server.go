@@ -41,6 +41,7 @@ type PlayerUpdate struct {
 }
 
 type UptimeUpdate struct {
+	Id         int32
 	Uptime     float32
 	UptimeLast float32
 }
@@ -365,6 +366,7 @@ func (s *Server) RecalcUptime() {
 	jsonMessage := &JSONResponse{
 		Ident: "uptime",
 		Value: &UptimeUpdate{
+			Id: s.Id,
 			Uptime: s.Uptime,
 			UptimeLast: s.UptimeLast,
 		},
