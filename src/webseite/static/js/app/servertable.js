@@ -121,7 +121,7 @@ define(["lib/heir", "lib/eventEmitter"], function (heir, eventEmitter) {
         }
 
         function sortServers() {
-            var serversCopy = ui.getServers();
+            var serversCopy = ui.getAllServers();
             var newSorted = [];
 
             // Convert them into the array

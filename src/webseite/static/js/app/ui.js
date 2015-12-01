@@ -3,14 +3,14 @@
  *
  * Chart and table rendering
  */
-define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "lib/heir", "lib/eventEmitter"], function(Chart, timeSlider, ServerTable, ViewSelector, heir, eventEmitter) {
+define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "lib/heir", "lib/eventEmitter"], function (Chart, timeSlider, ServerTable, ViewSelector, heir, eventEmitter) {
     function UI() {
         var socket = null,
             currentServers = {},
             allServers = {},
-            viewSelector = new ViewSelector( this),
-            serverTable = new ServerTable( this ),
-            chart = new Chart( this ),
+            viewSelector = new ViewSelector(this),
+            serverTable = new ServerTable(this),
+            chart = new Chart(this),
             self = this;
 
         /**
@@ -18,7 +18,7 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
          *
          * @param newSocket
          */
-        this.bindSocket = function(newSocket) {
+        this.bindSocket = function (newSocket) {
             socket = newSocket;
             socket.registerFunction("servers", this.onNewServers);
             socket.registerFunction("pings", this.onPings);
@@ -28,7 +28,7 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
             socket.registerFunction("uptime", this.onUptimeUpdate);
         };
 
-        this.getSocket = function() {
+        this.getSocket = function () {
             return socket;
         };
 
@@ -37,11 +37,15 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
          *
          * @returns {{}}
          */
-        this.getServers = function() {
+        this.getServers = function () {
             return currentServers;
         };
 
-        this.onMaxPlayerUpdate = function(data) {
+        this.getAllServers = function () {
+            return allServers;
+        };
+
+        this.onMaxPlayerUpdate = function (data) {
             allServers[data["Id"]]["MaxPlayers"] = data["MaxPlayers"];
 
             if (currentServers.hasOwnProperty(data["Id"])) {
@@ -50,7 +54,7 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
             }
         };
 
-        this.onUptimeUpdate = function(data) {
+        this.onUptimeUpdate = function (data) {
             allServers[data["Id"]]["Uptime"] = data["Uptime"];
             allServers[data["Id"]]["UptimeLast"] = data["UptimeLast"];
 
@@ -60,7 +64,7 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
             }
         };
 
-        this.onPlayerUpdate = function(data) {
+        this.onPlayerUpdate = function (data) {
             allServers[data["Id"]]["Online"] = data["Online"];
             allServers[data["Id"]]["Average"] = data["Average"];
             allServers[data["Id"]]["Record"] = data["Record"];
@@ -74,8 +78,8 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
             }
         };
 
-        this.onPings = function(data) {
-            data.forEach(function(value) {
+        this.onPings = function (data) {
+            data.forEach(function (value) {
                 allServers[value["Id"]]["Players"] = value["Players"];
             });
 
@@ -83,7 +87,7 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
             timeSlider.resetDisabledState();
         };
 
-        this.onViews = function(data) {
+        this.onViews = function (data) {
             self.emit("newViews", data);
         };
 
@@ -92,7 +96,7 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
          *
          * @param data
          */
-        this.onNewServers = function(data) {
+        this.onNewServers = function (data) {
             // Reset the Chart
             chart.resetColors();
 
@@ -115,7 +119,7 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
 
             // Let the chart render
             chart.render();
-            socket.sendPingIDs( currentServers );
+            socket.sendPingIDs(currentServers);
             serverTable.render(true);
         };
 
@@ -124,16 +128,16 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
          *
          * @param time
          */
-        this.onChangeTime = function(time) {
-            socket.sendRange( time );
-            socket.sendPingIDs( currentServers );
+        this.onChangeTime = function (time) {
+            socket.sendRange(time);
+            socket.sendPingIDs(currentServers);
         };
 
-        this.onHideServer = function(serverId) {
+        this.onHideServer = function (serverId) {
             var newCurrentServers = {};
 
-            for(var key in currentServers) {
-                if(currentServers.hasOwnProperty(key) && key != serverId) {
+            for (var key in currentServers) {
+                if (currentServers.hasOwnProperty(key) && key != serverId) {
                     newCurrentServers[key] = currentServers[key];
                 }
             }
@@ -142,7 +146,7 @@ define(["app/chart", "app/timeSlider", "app/servertable", "app/viewselector", "l
             chart.render();
         };
 
-        this.onShowServer = function(serverID) {
+        this.onShowServer = function (serverID) {
             currentServers[serverID] = allServers[serverID];
             chart.render();
         };
