@@ -76,7 +76,7 @@ func SendAvailableViews(c *websocket.Connection) {
 
 	// Check if User is logged in, if so include his views
 	var rawSeter orm.RawSeter
-	if c.Session.Get("userId").(int32) != -1 {
+	if c.Session.Get("userId") != nil && c.Session.Get("userId").(int32) != -1 {
 		qb.Or("`owner_id` = ?")
 		rawSeter = o.Raw(qb.String(), int32(systemUserId), c.Session.Get("userId").(int32))
 	} else {
