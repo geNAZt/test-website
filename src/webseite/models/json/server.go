@@ -299,15 +299,16 @@ func (s *Server) RecalcRecord() {
 
 	// Get the SQL Statement and execute it
 	sql := qb.String()
-	pings := models.MaxOnline{}
-	err := o.Raw(sql).QueryRow(&pings)
+
+	var maps []orm.Params
+	_, err := o.Raw(sql).Values(&maps)
 	if err != nil {
 		fmt.Printf( "%v", err );
 	}
 
 	// Set the record
-	if pings.MaxOnline > 0 {
-		s.Record = pings.MaxOnline
+	if len(maps) > 0 {
+		s.Record = maps[0]["MaxOnline"]
 	}
 }
 
