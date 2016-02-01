@@ -308,7 +308,10 @@ func (s *Server) RecalcRecord() {
 
 	// Set the record
 	if len(maps) > 0 {
-		s.Record = strconv.ParseInt( maps[0]["MaxOnline"].(string), 10, 32 )
+		s.Record, err = strconv.ParseInt( maps[0]["MaxOnline"].(string), 10, 32 )
+		if err != nil {
+			fmt.Printf( "%v", err );
+		}
 	}
 }
 
