@@ -25,7 +25,12 @@ func (j *JSONResponse) BroadcastToServerID(serverID int32) {
 	jsonBytes := j.marshal()
 	if len(jsonBytes) > 0 {
 		for c := range websocket.Hub.Connections {
-			allowedServers := c.Session.Get("servers").(map[int32]bool)
+			allowedServers := c.Session.Get("servers")
+			if allowedServers == nil {
+				continue
+			}
+
+			allowedServers = allowedServers.(map[int32]bool)
 			if val, ok := allowedServers[serverID]; !ok || !val {
 				continue
 			}
