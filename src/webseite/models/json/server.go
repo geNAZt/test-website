@@ -22,7 +22,7 @@ type Server struct {
 	IP         string
 	Online     int32
 	MaxPlayers int32
-	Record     int32
+	Record     int64
 	Average    int32
 	Favicon    string
 	Ping24     int32
@@ -37,7 +37,7 @@ type PlayerUpdate struct {
 	Time    int64
 	Ping    int32
 	Ping24  int32
-	Record  int32
+	Record  int64
 	Average int32
 }
 
