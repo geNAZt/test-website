@@ -308,7 +308,7 @@ func (s *Server) RecalcRecord() {
 
 	// Set the record
 	if len(maps) > 0 {
-		s.Record = maps[0]["MaxOnline"]
+		s.Record = maps[0]["MaxOnline"].(int32)
 	}
 }
 
