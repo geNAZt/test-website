@@ -19,5 +19,4 @@ type MaxOnline struct {
 func init() {
 	// Need to register model in init
 	orm.RegisterModel(new(Ping))
-	orm.RegisterModel(new(MaxOnline))
 }
