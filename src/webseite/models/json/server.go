@@ -292,21 +292,18 @@ func (s *Server) RecalcRecord() {
 
 	// Build up the Query
 	qb, _ := orm.NewQueryBuilder("mysql")
-	qb.Select("*").
+	qb.Select("MAX(`online`) AS `MaxOnline`").
 	From("ping").
-	Where("server_id = " + strconv.FormatInt(int64(s.Id), 10)).
-	OrderBy("online").
-	Desc().
-	Limit(1)
+	Where("server_id = " + strconv.FormatInt(int64(s.Id), 10));
 
 	// Get the SQL Statement and execute it
 	sql := qb.String()
-	pings := []models.Ping{}
+	pings := []models.MaxOnline{}
 	o.Raw(sql).QueryRows(&pings)
 
 	// Set the record
 	if len(pings) > 0 {
-		s.Record = pings[0].Online
+		s.Record = pings[0].MaxOnline
 	}
 }
 

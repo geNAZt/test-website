@@ -12,6 +12,10 @@ type Ping struct {
 	Time   time.Time `orm:"auto_now"`
 }
 
+type MaxOnline struct {
+	MaxOnline int32
+}
+
 func init() {
 	// Need to register model in init
 	orm.RegisterModel(new(Ping))
