@@ -30,8 +30,8 @@ func (j *JSONResponse) BroadcastToServerID(serverID int32) {
 				continue
 			}
 
-			allowedServers = allowedServers.(map[int32]bool)
-			if val, ok := allowedServers[serverID]; !ok || !val {
+			checkServers := allowedServers.(map[int32]bool)
+			if val, ok := checkServers[serverID]; !ok || !val {
 				continue
 			}
 
