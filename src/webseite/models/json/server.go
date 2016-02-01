@@ -10,6 +10,7 @@ import (
 	"webseite/cache"
 	"webseite/models"
 	"webseite/websocket"
+	"fmt"
 )
 
 const createdFormat = "2006-01-02 15:04:05"
@@ -298,12 +299,15 @@ func (s *Server) RecalcRecord() {
 
 	// Get the SQL Statement and execute it
 	sql := qb.String()
-	pings := []models.MaxOnline{}
-	o.Raw(sql).QueryRows(&pings)
+	pings := models.MaxOnline{}
+	err := o.Raw(sql).QueryRow(&pings)
+	if err != nil {
+		fmt.Printf( "%v", err );
+	}
 
 	// Set the record
-	if len(pings) > 0 {
-		s.Record = pings[0].MaxOnline
+	if pings.MaxOnline > 0 {
+		s.Record = pings.MaxOnline
 	}
 }
 
