@@ -74,7 +74,7 @@ func InitTasks() {
 			count++
 		}
 
-		fmt.Printf("Inserting %d new pings...\n", len(bulk))
+		fmt.Printf("Inserting %d new pings...\n", count)
 
 		// Insert with max 20 in a Query
 		o.InsertMulti(20, bulk)
