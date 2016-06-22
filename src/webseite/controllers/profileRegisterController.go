@@ -8,7 +8,7 @@ import (
 	"github.com/astaxie/beego/orm"
 	"webseite/mail"
 	"webseite/models"
-	util "webseite/util"
+	"webseite/util"
 )
 
 type ProfileRegisterController struct {
@@ -33,7 +33,7 @@ func (c *ProfileRegisterController) Get() {
 
 	c.Data["errors"] = errors
 	c.Data["lastEmail"] = c.GetSession("profile.register.lastEmail")
-	c.TplNames = "profile/register.tpl"
+	c.TplName = "profile/register.tpl"
 
 	if c.GetSession("profile.register.lastEmail") != nil {
 		c.DelSession("profile.register.lastEmail")
@@ -41,8 +41,8 @@ func (c *ProfileRegisterController) Get() {
 }
 
 func (c *ProfileRegisterController) Post() {
-    // Generate new Flash Data
-    flash := beego.NewFlash()
+	// Generate new Flash Data
+	flash := beego.NewFlash()
 
 	// ORM
 	o := orm.NewOrm()
@@ -62,8 +62,8 @@ func (c *ProfileRegisterController) Post() {
 			// Build up the Query
 			qb, _ := orm.NewQueryBuilder("mysql")
 			qb.Select("*").
-				From("user").
-				Where("`email` = ?")
+			From("user").
+			Where("`email` = ?")
 
 			// Get the SQL Statement and execute it
 			sql := qb.String()
@@ -118,8 +118,8 @@ func (c *ProfileRegisterController) Post() {
 	o.Insert(user)
 
 	// Flash for MainPage
-    flash.Success("Your registration has been completed. Please check your Inbox for activation")
-    flash.Store(&c.Controller)
+	flash.Success("Your registration has been completed. Please check your Inbox for activation")
+	flash.Store(&c.Controller)
 
 	// Redirect back to the Mainpage
 	c.Redirect("/", 302)

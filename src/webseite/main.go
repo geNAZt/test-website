@@ -60,7 +60,7 @@ func init() {
 	// Check which Database we use
 	beego.BeeLogger.Info("Using %s as Database Driver", dbDriver)
 	if dbDriver == "mysql" {
-		orm.RegisterDriver(dbDriver, orm.DR_MySQL)
+		orm.RegisterDriver(dbDriver, orm.DRMySQL)
 		beego.BeeLogger.Info("Connecting to MySQL Server: %s@%s/%s using a MinPool of %d, MaxConnections of %d", dbUser, dbHost, dbDatabase, dbMinPool, dbMaxConnections)
 		orm.RegisterDataBase("default", dbDriver, dbUser+":"+dbPass+"@"+dbHost+"/"+dbDatabase+"?charset=utf8", dbMinPool, dbMaxConnections)
 	} else {
@@ -140,8 +140,6 @@ func init() {
 }
 
 func main() {
-	orm.Debug = true
-
 	// Error.
 	err := orm.RunSyncdb("default", false, false)
 	if err != nil {

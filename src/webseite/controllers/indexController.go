@@ -14,9 +14,9 @@ func (c *MainController) Get() {
 		c.DelSession("profile.register.lastEmail")
 	}
 
-    // Read flash
-    flash := beego.ReadFromRequest(&c.Controller)
-    flashes := flash.Data
+	// Read flash
+	flash := beego.ReadFromRequest(&c.Controller)
+	flashes := flash.Data
 
 	// Check for login id
 	if c.GetSession("userId") == nil {
@@ -25,7 +25,7 @@ func (c *MainController) Get() {
 
 	c.Data["flash"] = flashes
 	c.Data["host"] = "minecrafttracker.net"
-    c.Data["showViewSelector"] = true
-    c.Data["user"] = c.GetSession("user")
-	c.TplNames = "index.tpl"
+	c.Data["showViewSelector"] = true
+	c.Data["user"] = c.GetSession("user")
+	c.TplName = "index.tpl"
 }

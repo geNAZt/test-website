@@ -12,6 +12,7 @@ import (
 	"webseite/util"
 	"sync"
 	"webseite/cache"
+	"fmt"
 )
 
 var servers []models.Server
@@ -24,14 +25,16 @@ func InitTasks() {
 	o := orm.NewOrm()
 
 	// Build up the Query
+	fmt.Printf("Building up server caches...\n")
 	qb, _ := orm.NewQueryBuilder("mysql")
 	qb.Select("*").
-		From("`server`")
+	From("`server`")
 
 	// Get the SQL Statement and execute it
 	sql := qb.String()
 	servers = []models.Server{}
 	o.Raw(sql).QueryRows(&servers)
+	fmt.Printf("Done building up server caches...\n")
 
 	// Reload the JSON side
 	json.ReloadServers(servers)
@@ -50,9 +53,13 @@ func InitTasks() {
 		return nil
 	})
 
-	batchInserter := toolbox.NewTask("batchInserter", "0 * * * * *", func() error {
+	batchInserter := toolbox.NewTask("batchInserter", "0/10 * * * * *", func() error {
 		queueMutex.Lock()
 		defer queueMutex.Unlock()
+
+		if queue.Size() == 0 {
+			return nil
+		}
 
 		// Remap into bulk array
 		bulk := make([]*models.Ping, queue.Size())
@@ -66,6 +73,8 @@ func InitTasks() {
 			bulk[count] = ele
 			count++
 		}
+
+		fmt.Printf("Inserting %d new pings...\n", queue.Size())
 
 		// Insert with max 20 in a Query
 		o.InsertMulti(20, bulk)
@@ -91,6 +100,8 @@ func InitTasks() {
 }
 
 func ping(server *models.Server) {
+	fmt.Printf("Pinging server %s for new data...\n", server.Name)
+
 	// Ask the JSON side if we have a animated Favicon
 	fetchFavicon := true
 	fetchAnimated := server.DownloadAnimatedFavicon
@@ -102,17 +113,14 @@ func ping(server *models.Server) {
 	// Make ping
 	status, err := statusresolver.GetStatus(server.Ip, fetchAnimated)
 	if err != nil {
-		status, err = statusresolver.GetStatus(server.Ip, fetchAnimated)
-		if err != nil {
-			beego.BeeLogger.Warn("Error while pinging: %v", err)
+		beego.BeeLogger.Warn("Error while pinging: %v", err)
 
-			// Create "fake" ping
-			status = &statusdata.Status{
-				Players: &statusdata.MCPlayers{
-					Online: 0,
-					Max:    0,
-				},
-			}
+		// Create "fake" ping
+		status = &statusdata.Status{
+			Players: &statusdata.MCPlayers{
+				Online: 0,
+				Max:    0,
+			},
 		}
 	}
 

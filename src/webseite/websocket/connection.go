@@ -68,7 +68,7 @@ type Connection struct {
 	customChannels []chan struct{}
 
 	// Session from HTTP Request
-	Session session.SessionStore
+	Session session.Store
 
 	// Boolean of the open state
 	Open bool

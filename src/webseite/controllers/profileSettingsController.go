@@ -13,7 +13,7 @@ type ProfileSettingsController struct {
 
 func (c *ProfileSettingsController) Get() {
 	c.Data["user"] = c.GetSession("user")
-	c.TplNames = "profile/settings.tpl"
+	c.TplName = "profile/settings.tpl"
 }
 
 func (c *ProfileSettingsController) Post() {

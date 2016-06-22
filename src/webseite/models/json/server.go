@@ -152,6 +152,8 @@ func ReloadServers(servers []models.Server) {
 
 	// Iterate over all Servers to calc 24h Pings
 	for serverI := range servers {
+		fmt.Printf("Reloading server %d...\n", serverI)
+
 		sqlServer := servers[serverI]
 
 		// Check if there is a old entry
@@ -288,6 +290,8 @@ func UpdateStatus(id int32, status *status.Status) {
 }
 
 func (s *Server) RecalcRecord() {
+	fmt.Printf("Recalc record for server %d...\n", s.Id)
+
 	// ORM
 	o := orm.NewOrm()
 
@@ -321,6 +325,8 @@ func (s *Server) RecalcRecord() {
 }
 
 func (s *Server) RecalcAverage() {
+	fmt.Printf("Recalc average for server %d...\n", s.Id)
+
 	// ORM
 	o := orm.NewOrm()
 
@@ -351,6 +357,8 @@ func (s *Server) RecalcAverage() {
 }
 
 func (s *Server) RecalcUptime() {
+	fmt.Printf("Recalc uptime for server %d...\n", s.Id)
+
 	// ORM
 	o := orm.NewOrm()
 
