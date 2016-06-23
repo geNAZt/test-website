@@ -9,14 +9,12 @@ import (
 	"time"
 	"webseite/models"
 	"webseite/models/json"
-	"webseite/util"
 	"sync"
 	"webseite/cache"
 	"fmt"
 )
 
 var servers []models.Server
-var queue *util.Queue
 var queueMutex = &sync.Mutex{}
 var serverMutex = &sync.Mutex{}
 
@@ -39,9 +37,6 @@ func InitTasks() {
 	// Reload the JSON side
 	json.ReloadServers(servers)
 
-	// Prepare the queue and let the pinger roll
-	queue = &util.Queue{Nodes: make([]*models.Ping, 100)}
-
 	mcping := toolbox.NewTask("mcping", "0 * * * * *", func() error {
 		// Ping all da servers
 		serverMutex.Lock();
@@ -53,32 +48,9 @@ func InitTasks() {
 		return nil
 	})
 
-	batchInserter := toolbox.NewTask("batchInserter", "0/10 * * * * *", func() error {
+	batchInserter := toolbox.NewTask("batchInserter", "0 30 * * * *", func() error {
 		queueMutex.Lock()
 		defer queueMutex.Unlock()
-
-		if queue.Size() == 0 {
-			return nil
-		}
-
-		// Remap into bulk array
-		bulk := make([]*models.Ping, queue.Size())
-		count := 0
-		for {
-			ele := queue.Pop()
-			if ele == nil {
-				break
-			}
-
-			bulk[count] = ele
-			count++
-		}
-
-		fmt.Printf("Inserting %d new pings...\n", count)
-
-		// Insert with max 20 in a Query
-		o.InsertMulti(20, bulk)
-		queue = &util.Queue{Nodes: make([]*models.Ping, 100)}
 
 		// Reload servers
 		serverMutex.Lock()
@@ -100,6 +72,8 @@ func InitTasks() {
 }
 
 func ping(server *models.Server) {
+	o := orm.NewOrm()
+
 	fmt.Printf("Pinging server %s for new data...\n", server.Name)
 
 	// Ask the JSON side if we have a animated Favicon
@@ -136,9 +110,7 @@ func ping(server *models.Server) {
 		Time:   time.Now(),
 	}
 
-	queueMutex.Lock()
-	queue.Push(ping)
-	queueMutex.Unlock()
+	o.Insert(ping)
 
 	// Notify the JSON side
 	json.UpdateStatus(server.Id, status)
