@@ -343,7 +343,12 @@ func (s *Server) RecalcAverage() {
 
 	// Get the SQL Statement and execute it
 	sql := qb.String()
-	o.Raw(sql).QueryRow(&s.Average)
+	var maps []orm.Params
+	o.Raw(sql).Values(&maps)
+
+	if len(maps) > 0 {
+		s.Average = maps[0]["average"];
+	}
 }
 
 func (s *Server) RecalcUptime() {
