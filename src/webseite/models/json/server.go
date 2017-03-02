@@ -327,33 +327,23 @@ func (s *Server) RecalcRecord() {
 func (s *Server) RecalcAverage() {
 	fmt.Printf("Recalc average for server %d...\n", s.Id)
 
+	// Get the current time
+	_, offset := time.Now().Zone()
+	pastTime := time.Unix((time.Now().Add(time.Duration(-24 * 60) * time.Minute).Unix()) - int64(offset), 0).Format(createdFormat)
+
 	// ORM
 	o := orm.NewOrm()
 
 	// Build up the Query
 	qb, _ := orm.NewQueryBuilder("mysql")
-	qb.Select("*").
+	qb.Select("AVG(online) AS average").
 	From("ping").
 	Where("server_id = " + strconv.FormatInt(int64(s.Id), 10)).
-	OrderBy("time").
-	Desc().
-	Limit(60 * 24)
+	And("time >= " + pastTime)
 
 	// Get the SQL Statement and execute it
 	sql := qb.String()
-	pings := []models.Ping{}
-	o.Raw(sql).QueryRows(&pings)
-
-	// Calc the average
-	overall := int32(0)
-	for pingI := range pings {
-		overall = overall + pings[pingI].Online
-	}
-
-	len := int32(len(pings))
-	if len > 0 {
-		s.Average = overall / len
-	}
+	o.Raw(sql).QueryRow(&s.Average)
 }
 
 func (s *Server) RecalcUptime() {
